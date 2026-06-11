@@ -25,8 +25,20 @@ export function buildBridgePayloadPreviews(payPeriod = {}) {
   });
 }
 
+export function buildBridgePreviewSummary(previews = []) {
+  const safePreviews = Array.isArray(previews) ? previews : [];
+  const bridgeReadyCount = safePreviews.filter((preview) => preview.missingFields.length === 0).length;
+
+  return {
+    totalPreviewCount: safePreviews.length,
+    bridgeReadyCount,
+    missingFieldCount: safePreviews.length - bridgeReadyCount,
+  };
+}
+
 export function buildBridgePayloadPreviewExport(payPeriod = {}, options = {}) {
   const previews = buildBridgePayloadPreviews(payPeriod);
+  const summary = buildBridgePreviewSummary(previews);
 
   return {
     appName: "CrewPay Field App",
@@ -34,8 +46,7 @@ export function buildBridgePayloadPreviewExport(payPeriod = {}, options = {}) {
     exportedAt: options.exportedAt || new Date().toISOString(),
     payPeriodId: stringOr(payPeriod.id, ""),
     payPeriodLabel: stringOr(payPeriod.label, ""),
-    totalPreviewCount: previews.length,
-    bridgeReadyCount: previews.filter((preview) => preview.missingFields.length === 0).length,
+    ...summary,
     previewOnly: true,
     note: "Preview only. This file is for review before workbook connection is enabled.",
     previews,
