@@ -7,7 +7,7 @@ Live app:
 https://timbone72-cc.github.io/crewpay-worker-field-app/
 
 Local path:
-~/projects/fieldledger-clone
+~/projects/crewpay-worker-field-app
 
 Branch:
 crewpay-worker-app
