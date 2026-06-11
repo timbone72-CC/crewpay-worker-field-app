@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "test:crewpay": "node --test src/features/crewpay/*.test.mjs",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:worker-app": "node --test src/**/*.test.mjs"
   },
   "dependencies": {
     "react": "^19.2.5",
