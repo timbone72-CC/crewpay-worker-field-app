@@ -328,6 +328,14 @@ button:disabled {
   margin-top: 18px;
 }
 
+.timesheet-print-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 12px 0;
+  font-size: 0.95rem;
+}
+
 .timesheet-print-table {
   width: 100%;
   border-collapse: collapse;

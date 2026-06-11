@@ -54,7 +54,7 @@ export default function ExportActionsDropdown({ onShowTimesheet, onDataChanged }
         <DownloadProofManifestButton />
 
         <button type="button" onClick={handlePrintTimesheet}>
-          Print Timesheet
+          Print Worker Timesheet
         </button>
 
         <p className="helper">

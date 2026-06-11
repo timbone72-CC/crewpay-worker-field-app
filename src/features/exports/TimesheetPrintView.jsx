@@ -8,16 +8,25 @@ export default function TimesheetPrintView() {
   const entries = jobs.map(mapJobToCrewPayWorkEntry);
   const mileageEntries = Array.isArray(payPeriod.mileageEntries) ? payPeriod.mileageEntries : [];
   const mileageSummary = calculateMileageSummary(mileageEntries);
+  const totalHours = entries.reduce((total, entry) => total + Number(entry.hoursWorked || 0), 0);
+  const totalProofRefs = entries.reduce((total, entry) => total + entry.proofRefs.length, 0);
 
   return (
     <section className="timesheet-print-view">
-      <h2>CrewPay Worker Review Report</h2>
+      <h2>CrewPay Worker Timesheet</h2>
       <p>
         {payPeriod.label || "Current Pay Period"}
         {payPeriod.startDate || payPeriod.endDate
           ? ` - ${payPeriod.startDate || "No start date"} to ${payPeriod.endDate || "No end date"}`
           : ""}
       </p>
+
+      <div className="timesheet-print-summary">
+        <span>Entries: <strong>{entries.length}</strong></span>
+        <span>Total Hours: <strong>{totalHours.toFixed(2)}</strong></span>
+        <span>Proof Refs: <strong>{totalProofRefs}</strong></span>
+        <span>Mileage: <strong>{mileageSummary.totalBusinessMiles.toFixed(2)} mi</strong></span>
+      </div>
 
       <table className="timesheet-print-table">
         <thead>
