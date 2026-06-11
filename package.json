@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "test:crewpay": "node --test src/features/crewpay/*.test.mjs",
     "preview": "vite preview",
-    "test:worker-app": "node --test src/**/*.test.mjs"
+    "test:worker-app": "find src -name '*.test.mjs' -print0 | xargs -0 node --test"
   },
   "dependencies": {
     "react": "^19.2.5",
