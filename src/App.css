@@ -241,6 +241,32 @@ button:disabled {
   color: #624a00;
 }
 
+.review-total-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.review-total-card {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border: 1px solid #d8e4dc;
+  border-radius: 8px;
+  background: #f7fbf8;
+}
+
+.review-total-card span {
+  color: #647067;
+  font-size: 0.9rem;
+}
+
+.review-total-card strong {
+  color: #17251f;
+  font-size: 1.2rem;
+}
+
 .review-record-section {
   display: grid;
   gap: 10px;
