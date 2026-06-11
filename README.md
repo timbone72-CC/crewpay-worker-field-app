@@ -2,7 +2,33 @@
 
 CrewPay Field App is a local-first worker field app for recording daily work entries, proof photos, expenses, mileage, pay-period review notes, backups, and CrewPay intake exports.
 
+Live app:
+https://timbone72-cc.github.io/crewpay-worker-field-app/
+
+Repo:
+https://github.com/timbone72-CC/crewpay-worker-field-app
+
+Branch:
+crewpay-worker-app
+
 This branch is adapted from a protected FieldLedger clone. The goal is a distinct CrewPay worker product, not a direct visual reskin.
+
+## Publish Method
+
+GitHub Pages deploys from the `crewpay-worker-app` branch through `.github/workflows/pages.yml`.
+
+The workflow runs:
+
+```bash
+npm ci
+npm run test:crewpay
+npm run build
+```
+
+The Vite production build publishes the `dist/` artifact to GitHub Pages.
+
+Expected public URL:
+https://timbone72-cc.github.io/crewpay-worker-field-app/
 
 ## Workbook Boundary
 
@@ -27,6 +53,24 @@ Do not commit real worker data, customer data, Sheet IDs, Apps Script URLs, toke
 Records are stored locally in the browser. Devices do not automatically share data.
 
 Personal Cloud Backup does not connect a cloud account or sync in the background. It only creates files the worker can download or manually save to Google Drive, iCloud, Dropbox, OneDrive, or another personal storage location.
+
+## Protected Source Boundary
+
+This repo was created from a protected FieldLedger clone.
+
+Do not push CrewPay worker app changes to `fieldledger-source`.
+
+The protected source remote should remain disabled for push:
+
+```text
+fieldledger-source DISABLED_DO_NOT_PUSH_TO_FIELDLEDGER_SOURCE
+```
+
+Push CrewPay worker app changes only to:
+
+```text
+origin crewpay-worker-app
+```
 
 ## Development
 
