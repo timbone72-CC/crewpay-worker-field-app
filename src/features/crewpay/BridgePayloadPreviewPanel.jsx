@@ -1,29 +1,9 @@
 import { loadActivePayPeriod } from "../pay-periods/activePayPeriodStorage.js";
-import { buildCrewPayBridgeTimeEntryPayload } from "./crewPayIntake.js";
-
-const REQUIRED_BRIDGE_FIELDS = [
-  "workerId",
-  "payPeriodId",
-  "workDate",
-  "jobWorkType",
-  "hoursWorked",
-  "rate",
-];
+import { buildBridgePayloadPreviews } from "./bridgePayloadPreview.js";
 
 export default function BridgePayloadPreviewPanel() {
   const payPeriod = loadActivePayPeriod();
-  const jobs = Array.isArray(payPeriod.jobs) ? payPeriod.jobs : [];
-  const previewPayloads = jobs.map((job) => {
-    const payload = buildCrewPayBridgeTimeEntryPayload(job, {
-      payPeriodId: job.payPeriodId || payPeriod.id,
-    });
-
-    return {
-      localId: job.id,
-      payload,
-      missingFields: findMissingBridgeFields(payload),
-    };
-  });
+  const previewPayloads = buildBridgePayloadPreviews(payPeriod);
 
   return (
     <section className="panel">
@@ -59,14 +39,4 @@ export default function BridgePayloadPreviewPanel() {
       )}
     </section>
   );
-}
-
-function findMissingBridgeFields(payload) {
-  return REQUIRED_BRIDGE_FIELDS.filter((field) => {
-    if (field === "hoursWorked" || field === "rate") {
-      return Number(payload[field]) <= 0;
-    }
-
-    return !String(payload[field] ?? "").trim();
-  });
 }
