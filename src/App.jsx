@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "./App.css";
+import BridgePayloadPreviewPanel from "./features/crewpay/BridgePayloadPreviewPanel.jsx";
 import ExpenseEntryForm from "./features/expenses/ExpenseEntryForm.jsx";
 import SavedExpensesList from "./features/expenses/SavedExpensesList.jsx";
 import ExportActionsDropdown from "./features/exports/ExportActionsDropdown.jsx";
@@ -117,6 +118,7 @@ export default function App() {
           <PayPeriodInfoForm key={`pay-period-info-${refreshCount}`} />
           <PayPeriodSummaryPanel key={`review-summary-${refreshCount}`} />
           <ReviewRecordsPanel key={`review-records-${refreshCount}`} />
+          <BridgePayloadPreviewPanel key={`bridge-preview-${refreshCount}`} />
           <ExportActionsDropdown
             onShowTimesheet={() => setShowTimesheetPrintView(true)}
             onDataChanged={refreshAppData}
