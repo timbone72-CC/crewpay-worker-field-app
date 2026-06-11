@@ -189,6 +189,10 @@ export default function JobEntryForm({ onJobSaved }) {
     return Number((minutes / 60).toFixed(2));
   }, [form.endTime, form.hoursWorked, form.startTime]);
 
+  const overnightShiftDetected = Boolean(
+    form.startTime && form.endTime && form.endTime < form.startTime && !form.hoursWorked,
+  );
+
   function updateForm(field, value) {
     setForm((currentForm) => ({
       ...currentForm,
@@ -371,6 +375,10 @@ export default function JobEntryForm({ onJobSaved }) {
       <div className="section-heading">
         <span className="section-kicker">Daily Work</span>
         <h2>{form.editingJobId ? "Edit Work Entry" : "Add Work Entry"}</h2>
+        <p className="helper">
+          Save a local draft for each work day. Review totals and proof references before exporting
+          to the CrewPay Ledger workbook.
+        </p>
       </div>
 
       <div className="form-grid">
@@ -397,16 +405,25 @@ export default function JobEntryForm({ onJobSaved }) {
             <option value="submitted">Submitted</option>
             <option value="needs_review">Needs Review</option>
           </select>
+          <span className="helper">This is only your local review status.</span>
         </label>
 
         <label className="field">
           Job ID
-          <input value={form.jobId} onChange={(event) => updateForm("jobId", event.target.value)} />
+          <input
+            value={form.jobId}
+            onChange={(event) => updateForm("jobId", event.target.value)}
+            placeholder="Optional job, ticket, or work order ID"
+          />
         </label>
 
         <label className="field">
           Job Name
-          <input value={form.jobName} onChange={(event) => updateForm("jobName", event.target.value)} />
+          <input
+            value={form.jobName}
+            onChange={(event) => updateForm("jobName", event.target.value)}
+            placeholder="Example: Oak Ridge Units"
+          />
         </label>
 
         <label className="field">
@@ -416,6 +433,7 @@ export default function JobEntryForm({ onJobSaved }) {
             list="site-name-options"
             value={form.siteName}
             onChange={(event) => updateForm("siteName", event.target.value)}
+            placeholder="Example: Remote Site"
           />
           <datalist id="site-name-options">
             {siteOptions.map((siteOption) => (
@@ -431,6 +449,7 @@ export default function JobEntryForm({ onJobSaved }) {
             list="company-options"
             value={form.companyName}
             onChange={(event) => updateForm("companyName", event.target.value)}
+            placeholder="Example: Demo Field Services"
           />
           <datalist id="company-options">
             {companyOptions.map((companyOption) => (
@@ -447,6 +466,9 @@ export default function JobEntryForm({ onJobSaved }) {
         <label className="field">
           End Time
           <input type="time" value={form.endTime} onChange={(event) => updateForm("endTime", event.target.value)} />
+          <span className="helper">
+            If end time is earlier than start time, CrewPay treats it as overnight work.
+          </span>
         </label>
 
         <label className="field">
@@ -459,16 +481,30 @@ export default function JobEntryForm({ onJobSaved }) {
             onChange={(event) => updateForm("hoursWorked", event.target.value)}
             placeholder={calculatedHours ? String(calculatedHours) : "0"}
           />
+          <span className="helper">
+            {form.hoursWorked
+              ? "Manual hours are used instead of the start/end time calculation."
+              : calculatedHours
+                ? `Calculated from start/end: ${calculatedHours.toFixed(2)} hours.`
+                : "Enter hours directly or use start/end time to calculate."}
+          </span>
+          {overnightShiftDetected && (
+            <span className="helper">Overnight shift detected: end time is counted on the next day.</span>
+          )}
         </label>
 
         <label className="field">
-          Pay Type
+          Pay Method
           <input value={form.payType} onChange={(event) => updateForm("payType", event.target.value)} />
+          <span className="helper">Example: hourly. Keep this matched to the CrewPay workbook setup.</span>
         </label>
 
         <label className="field">
-          Rate Ref
+          Rate / Reference
           <input value={form.rateRef} onChange={(event) => updateForm("rateRef", event.target.value)} />
+          <span className="helper">
+            Local reference only. CrewPay Ledger workbook remains the source of truth for approved pay.
+          </span>
         </label>
 
         <label className="field full-width">
@@ -529,7 +565,9 @@ export default function JobEntryForm({ onJobSaved }) {
       <div className="result-card status-card">
         <span>CrewPay Intake Hours</span>
         <strong>{calculatedHours.toFixed(2)}</strong>
-        <small>Workbook review remains the source of truth for approved pay.</small>
+        <small>
+          Review this number before saving. Workbook review remains the source of truth for approved pay.
+        </small>
       </div>
 
       <div className="section-actions">
