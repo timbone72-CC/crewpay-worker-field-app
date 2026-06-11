@@ -40,7 +40,7 @@ Do not overwrite the preserved original final script.
 ### 2. Worker Field App
 
 Local path:
-~/projects/fieldledger-clone
+~/projects/crewpay-worker-field-app
 
 GitHub repo:
 https://github.com/timbone72-CC/crewpay-worker-field-app
