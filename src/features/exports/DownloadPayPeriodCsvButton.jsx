@@ -22,7 +22,7 @@ export default function DownloadPayPeriodCsvButton() {
 
   return (
     <button type="button" onClick={downloadCsv}>
-      Download Spreadsheet CSV
+      Export CrewPay Time Entries CSV
     </button>
   );
 }
@@ -35,5 +35,5 @@ function buildFileName(payPeriod) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-  return `fieldledger-${safeLabel || "pay-period"}.csv`;
+  return `crewpay-time-entries-${safeLabel || "pay-period"}.csv`;
 }

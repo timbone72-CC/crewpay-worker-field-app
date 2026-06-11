@@ -3,10 +3,9 @@ import react from "@vitejs/plugin-react";
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: "/fieldledger/",
+  base: "/crewpay-field-app/",
   build: {
-    outDir: "docs",
-    emptyOutDir: false,
+    outDir: "dist",
   },
   plugins: [react()],
 });

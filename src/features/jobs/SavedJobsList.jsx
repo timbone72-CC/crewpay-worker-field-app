@@ -75,16 +75,19 @@ export default function SavedJobsList({ onJobDeleted }) {
 
   return (
     <section className="panel">
-      <h2>Saved Jobs</h2>
+      <h2>Saved Work Entries</h2>
 
       {jobs.length === 0 ? (
-        <p className="helper">No jobs saved yet.</p>
+        <p className="helper">No work entries saved yet.</p>
       ) : (
         <div className="list saved-jobs-list">
           {jobs.map((job) => (
             <div className="result-card" key={job.id}>
               <span>{formatJobLabel(job)}</span>
-              <strong>${Number(job.totalPay || 0).toFixed(2)}</strong>
+              <strong>{Number(job.hoursWorkedCrewPay || job.hoursWorked || 0).toFixed(2)} hrs</strong>
+              <span className={`status-pill status-${job.localStatus || "draft"}`}>
+                {formatStatus(job.localStatus)}
+              </span>
 
               {(job.ticketPhotoId || job.ticketPhotoName || previewUrls[job.id]) && (
                 <div
@@ -112,7 +115,7 @@ export default function SavedJobsList({ onJobDeleted }) {
                     <span aria-hidden="true">📎</span>
                   )}
                   <span>
-                    Attached Photo
+                    Proof Photo
                     {job.ticketPhotoName ? `: ${job.ticketPhotoName}` : ""}
                     {job.ticketPhotoId && !previewUrls[job.id] ? " — preview unavailable here" : ""}
                   </span>
@@ -136,18 +139,17 @@ export default function SavedJobsList({ onJobDeleted }) {
 }
 
 function formatJobLabel(job) {
-  if (job.jobType === "torque_turn") {
-    return `Torque Turn — ${Number(job.additionalHours || 0)} additional hrs`;
-  }
+  const date = job.entryDate || job.date || "No date";
+  const jobName = job.jobName || job.jobId || "Work entry";
+  const siteName = job.siteName || job.rigNameOrNumber || "No site";
+  const companyName = job.companyName || job.company || "";
 
-  const buckingState = job.buckingState || "State not set";
-  const jobsCompleted = Number(job.jobsCompleted || 0);
-  const hoursPerJob = Number(job.hoursPerJob || 0);
-  const hoursWorked = Number(job.hoursWorked || 0);
+  return [date, jobName, siteName, companyName].filter(Boolean).join(" - ");
+}
 
-  if (jobsCompleted > 0 && hoursPerJob > 0) {
-    return `Bucking — ${buckingState} — ${jobsCompleted} job${jobsCompleted === 1 ? "" : "s"} × ${hoursPerJob} hrs = ${hoursWorked} hrs`;
-  }
-
-  return `Bucking — ${hoursWorked} hrs`;
+function formatStatus(status) {
+  if (status === "ready") return "Ready";
+  if (status === "submitted") return "Submitted";
+  if (status === "needs_review") return "Needs review";
+  return "Draft";
 }

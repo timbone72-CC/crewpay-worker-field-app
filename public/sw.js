@@ -1,20 +1,17 @@
-const CACHE_NAME = "fieldledger-v4-offline-shell";
-
-const APP_SHELL = [
-  "/fieldledger/",
-  "/fieldledger/manifest.webmanifest",
-  "/fieldledger/favicon.svg",
-  "/fieldledger/icon-192.png",
-  "/fieldledger/icon-512.png",
-  "/fieldledger/assets/index-BvJ7mAsr.js",
-  "/fieldledger/assets/index-BmXoxkAs.css"
-];
+const CACHE_NAME = "crewpay-field-app-v1-offline-shell";
+const APP_ROOT = "/crewpay-field-app/";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(APP_SHELL);
-    })
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll([
+        APP_ROOT,
+        `${APP_ROOT}manifest.webmanifest`,
+        `${APP_ROOT}favicon.svg`,
+        `${APP_ROOT}icon-192.png`,
+        `${APP_ROOT}icon-512.png`,
+      ])
+    )
   );
 
   self.skipWaiting();
@@ -25,7 +22,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key.startsWith("crewpay-field-app-") && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
     )
@@ -46,18 +43,13 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request)
-        .then((networkResponse) => {
-          const responseClone = networkResponse.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put("/fieldledger/", responseClone);
-          });
-
-          return networkResponse;
+        .then((response) => {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(APP_ROOT, responseClone));
+          return response;
         })
-        .catch(() => caches.match("/fieldledger/"))
+        .catch(() => caches.match(APP_ROOT))
     );
-
     return;
   }
 
@@ -67,16 +59,13 @@ self.addEventListener("fetch", (event) => {
         return cachedResponse;
       }
 
-      return fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.ok) {
-          const responseClone = networkResponse.clone();
-
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+      return fetch(event.request).then((response) => {
+        if (response?.ok) {
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseClone));
         }
 
-        return networkResponse;
+        return response;
       });
     })
   );

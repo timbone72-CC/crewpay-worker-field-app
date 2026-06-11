@@ -1,25 +1,25 @@
 {
-  "name": "FieldLedger",
-  "short_name": "FieldLedger",
-  "description": "Offline-first job, expense, mileage, and pay-period tracker for field workers.",
-  "start_url": "/fieldledger/",
+  "name": "CrewPay Field App",
+  "short_name": "CrewPay",
+  "description": "Offline-first worker field app for work entries, proof, local records, review, and CrewPay intake export.",
+  "start_url": "/crewpay-field-app/",
   "display": "standalone",
-  "background_color": "#08060d",
-  "theme_color": "#863bff",
+  "background_color": "#edf4ef",
+  "theme_color": "#0d5143",
   "icons": [
     {
-      "src": "/fieldledger/icon-192.png",
+      "src": "/crewpay-field-app/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/fieldledger/icon-512.png",
+      "src": "/crewpay-field-app/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "id": "/fieldledger/",
-  "scope": "/fieldledger/"
+  "id": "/crewpay-field-app/",
+  "scope": "/crewpay-field-app/"
 }

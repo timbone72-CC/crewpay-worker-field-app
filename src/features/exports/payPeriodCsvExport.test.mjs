@@ -7,25 +7,57 @@ const payPeriod = {
   endDate: "2026-05-15",
   jobs: [
     {
-      jobType: "bucking",
-      date: "2026-05-02",
-      company: "Legend",
-      rigNameOrNumber: "Rig 12",
-      fieldTicketNumber: "FT-100",
+      id: "local-1",
+      schemaVersion: 1,
+      workerId: "W-100",
+      workerName: "Worker One",
+      entryDate: "2026-05-02",
+      jobId: "JOB-100",
+      jobName: "Install",
+      siteName: "Primary Site",
+      companyName: "Customer",
+      startTime: "08:00",
+      endTime: "14:00",
       hoursWorked: 6,
-      transportation: 25,
-      totalPay: 168,
+      payType: "hourly",
+      rateRef: "standard",
+      notes: "Ready for review",
+      proofRefs: [{ proofId: "proof-1" }],
+      localStatus: "ready",
+      submittedAt: "",
+      createdAt: "2026-05-02T14:00:00.000Z",
+      updatedAt: "2026-05-02T14:30:00.000Z",
     },
     {
-      jobType: "torque_turn",
-      date: "2026-05-03",
-      company: "Legend",
-      rigNameOrNumber: "Rig 14",
-      fieldTicketNumber: "FT-200",
-      baseJobPay: 1400,
-      additionalHours: 7,
-      transportation: 0,
-      totalPay: 1596,
+      id: "local-2",
+      schemaVersion: 1,
+      workerId: "W-101",
+      workerName: "Worker Two",
+      entryDate: "2026-05-03",
+      jobId: "JOB-200",
+      jobName: "Repair, Inspect",
+      siteName: "Secondary Site",
+      companyName: "Customer",
+      startTime: "09:00",
+      endTime: "12:30",
+      hoursWorked: 3.5,
+      payType: "hourly",
+      rateRef: "standard",
+      notes: "Quote \"checked\" and newline\nsafe",
+      proofRefs: [],
+      localStatus: "draft",
+      submittedAt: "",
+      createdAt: "2026-05-03T12:30:00.000Z",
+      updatedAt: "2026-05-03T12:35:00.000Z",
+    },
+    {
+      jobType: "standard_work",
+      date: "2026-05-02",
+      company: "Customer",
+      rigNameOrNumber: "Primary Site",
+      fieldTicketNumber: "JOB-300",
+      hoursWorked: 4,
+      totalPay: 0,
     },
   ],
   mileageEntries: [
@@ -40,44 +72,56 @@ const payPeriod = {
 const csv = buildPayPeriodCsv(payPeriod);
 const rows = csv.split("\n").map((row) => row.split(","));
 
-const headerRow = rows.find((row) => row[0] === "Date");
+const headerRow = rows[0];
 assert.deepEqual(headerRow, [
-  "Date",
-  "Company",
-  "Rig Name/Number",
-  "Field Ticket Number",
-  "Day Rate",
+  "Schema Version",
+  "Local Entry ID",
+  "Worker ID",
+  "Worker Name",
+  "Entry Date",
+  "Job ID",
+  "Job Name",
+  "Site Name",
+  "Company Name",
+  "Start Time",
+  "End Time",
   "Hours Worked",
-  "Transportation",
-  "Total",
+  "Pay Type",
+  "Rate Ref",
+  "Notes",
+  "Proof Count",
+  "Local Status",
+  "Submitted At",
+  "Created At",
+  "Updated At",
 ]);
 
-const buckingRow = rows.find((row) => row[3] === "FT-100");
-assert.deepEqual(buckingRow, [
+const firstEntryRow = rows.find((row) => row[1] === "local-1");
+assert.deepEqual(firstEntryRow, [
+  "1",
+  "local-1",
+  "W-100",
+  "Worker One",
   "2026-05-02",
-  "Legend",
-  "Rig 12",
-  "FT-100",
-  "",
+  "JOB-100",
+  "Install",
+  "Primary Site",
+  "Customer",
+  "08:00",
+  "14:00",
   "6",
-  "25",
-  "168",
+  "hourly",
+  "standard",
+  "Ready for review",
+  "1",
+  "ready",
+  "",
+  "2026-05-02T14:00:00.000Z",
+  "2026-05-02T14:30:00.000Z",
 ]);
 
-const torqueTurnRow = rows.find((row) => row[3] === "FT-200");
-assert.deepEqual(torqueTurnRow, [
-  "2026-05-03",
-  "Legend",
-  "Rig 14",
-  "FT-200",
-  "1400",
-  "7",
-  "0",
-  "1596",
-]);
-
-const grandTotalRow = rows.find((row) => row[0] === "Grand Total");
-assert.deepEqual(grandTotalRow, ["Grand Total", "", "", "", "", "", "", "1764"]);
+assert.match(csv, /"Repair, Inspect"/);
+assert.match(csv, /"Quote ""checked"" and newline\nsafe"/);
 
 assert.doesNotMatch(csv, /mileageEntries/);
 assert.doesNotMatch(csv, /mileageRateSnapshot/);

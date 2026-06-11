@@ -1,24 +1,22 @@
 import { calculatePayPeriodSummary } from "../../shared/utils/calculatePayPeriodSummary.js";
 import { calculateMileageSummary } from "../../shared/utils/calculateMileageSummary.js";
-import { calculateTaxEstimate } from "../../shared/utils/calculateTaxEstimate.js";
 import { TAX_DISCLAIMER } from "../../shared/constants/fieldLedgerDefaults.js";
-import { loadSettings } from "../settings/settingsStorage.js";
+import { mapJobToCrewPayWorkEntry } from "../crewpay/crewPayIntake.js";
 import { loadActivePayPeriod } from "./activePayPeriodStorage.js";
 
 export default function PayPeriodSummaryPanel() {
   const payPeriod = loadActivePayPeriod();
   const summary = calculatePayPeriodSummary(payPeriod);
   const mileageSummary = calculateMileageSummary(payPeriod.mileageEntries);
-  const settings = loadSettings();
-  const taxEstimate = calculateTaxEstimate(summary, {
-    selfEmploymentTaxRate: settings.selfEmploymentTaxRate,
-    federalTaxRate: settings.federalTaxRate,
-    stateTaxRate: settings.stateTaxRate,
-  });
+  const workEntries = (Array.isArray(payPeriod.jobs) ? payPeriod.jobs : []).map(mapJobToCrewPayWorkEntry);
+  const readyCount = workEntries.filter((entry) => entry.localStatus === "ready").length;
+  const needsReviewCount = workEntries.filter((entry) => entry.localStatus === "needs_review").length;
+  const submittedCount = workEntries.filter((entry) => entry.localStatus === "submitted").length;
+  const totalHours = workEntries.reduce((total, entry) => total + Number(entry.hoursWorked || 0), 0);
 
   return (
     <section className="panel">
-      <h2>Pay Period Summary</h2>
+      <h2>Current Pay Period Review</h2>
 
       <p className="helper">
         {payPeriod.label || "Current Pay Period"}
@@ -28,62 +26,33 @@ export default function PayPeriodSummaryPanel() {
       </p>
 
       <div className="result-card">
-        <span>Gross Earnings</span>
-        <strong>${summary.grossEarnings.toFixed(2)}</strong>
+        <span>Work Entries</span>
+        <strong>{summary.jobCount}</strong>
       </div>
 
       <div className="result-card">
-        <span>Expenses</span>
+        <span>Total Hours</span>
+        <strong>{totalHours.toFixed(2)}</strong>
+      </div>
+
+      <div className="result-card">
+        <span>Ready / Submitted</span>
+        <strong>{readyCount} / {submittedCount}</strong>
+      </div>
+
+      <div className="result-card">
+        <span>Needs Review</span>
+        <strong>{needsReviewCount}</strong>
+      </div>
+
+      <div className="result-card">
+        <span>Local Expenses</span>
         <strong>${summary.expenseTotal.toFixed(2)}</strong>
       </div>
 
       <div className="result-card">
-        <span>Net Income</span>
-        <strong>${summary.netIncome.toFixed(2)}</strong>
-      </div>
-
-      <div className="result-card">
-        <span>Business Miles</span>
+        <span>Local Mileage</span>
         <strong>{mileageSummary.totalBusinessMiles.toFixed(2)} mi</strong>
-      </div>
-
-      <div className="result-card">
-        <span>Mileage Estimate</span>
-        <strong>${mileageSummary.totalMileageEstimate.toFixed(2)}</strong>
-      </div>
-
-      <div className="result-card">
-        <span>Estimated Tax</span>
-        <strong>${taxEstimate.estimatedTotalTax.toFixed(2)}</strong>
-      </div>
-
-      <details className="tax-estimate-details">
-        <summary>Tax Estimate Details</summary>
-
-        <div className="result-card">
-          <span>Taxable Income Used</span>
-          <strong>${taxEstimate.estimatedTaxableIncome.toFixed(2)}</strong>
-        </div>
-
-        <div className="result-card">
-          <span>Self-Employment Estimate</span>
-          <strong>${taxEstimate.estimatedSelfEmploymentTax.toFixed(2)}</strong>
-        </div>
-
-        <div className="result-card">
-          <span>Federal Estimate</span>
-          <strong>${taxEstimate.estimatedFederalTax.toFixed(2)}</strong>
-        </div>
-
-        <div className="result-card">
-          <span>State Estimate</span>
-          <strong>${taxEstimate.estimatedStateTax.toFixed(2)}</strong>
-        </div>
-      </details>
-
-      <div className="result-card">
-        <span>Estimated Take-Home</span>
-        <strong>${taxEstimate.estimatedTakeHomeAfterTax.toFixed(2)}</strong>
       </div>
 
       <p className="helper">{TAX_DISCLAIMER}</p>

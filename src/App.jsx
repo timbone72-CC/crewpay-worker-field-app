@@ -12,25 +12,26 @@ import PayPeriodSummaryPanel from "./features/pay-periods/PayPeriodSummaryPanel.
 import SettingsPanel from "./features/settings/SettingsPanel.jsx";
 import HelpPanel from "./features/help/HelpPanel.jsx";
 import TimesheetPrintView from "./features/exports/TimesheetPrintView.jsx";
+import { APP_NAME } from "./shared/constants/appInfo.js";
 
 const TABS = {
-  DASHBOARD: "dashboard",
-  JOBS: "jobs",
-  EXPENSES: "expenses",
-  MILEAGE: "mileage",
+  HOME: "home",
+  WORK: "work",
+  REVIEW: "review",
+  TOOLS: "tools",
   SETTINGS: "settings",
   HELP: "help",
 };
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState(TABS.DASHBOARD);
+  const [activeTab, setActiveTab] = useState(TABS.HOME);
   const [refreshCount, setRefreshCount] = useState(0);
   const [showTimesheetPrintView, setShowTimesheetPrintView] = useState(false);
   const [storageRecoveryMessage, setStorageRecoveryMessage] = useState("");
 
   useEffect(() => {
     function handleStorageRecovery(event) {
-      setStorageRecoveryMessage(event.detail?.message || "FieldLedger recovered from a storage problem.");
+      setStorageRecoveryMessage(event.detail?.message || `${APP_NAME} recovered from a storage problem.`);
     }
 
     window.addEventListener("fieldledger:storage-recovery", handleStorageRecovery);
@@ -47,12 +48,20 @@ export default function App() {
   return (
     <main className="app-shell">
       <section className="hero-card">
-        <p className="eyebrow">FieldLedger</p>
-        <h1>1099 field ticket, receipt, and pay-period tracker</h1>
+        <p className="eyebrow">CrewPay Worker Field App</p>
+        <h1>Daily work entries, proof, review, and CrewPay export.</h1>
         <p className="subtext">
-          Capture job tickets and receipts, review the details, calculate pay,
-          subtract expenses, and export a clean pay-period report.
+          Save worker-owned records locally, review the current pay period, and export a
+          CrewPay intake package for workbook review.
         </p>
+        <div className="hero-actions">
+          <button type="button" onClick={() => setActiveTab(TABS.WORK)}>
+            Add Work Entry
+          </button>
+          <button type="button" className="secondary-button" onClick={() => setActiveTab(TABS.REVIEW)}>
+            Review & Export
+          </button>
+        </div>
       </section>
 
       {storageRecoveryMessage && (
@@ -65,101 +74,66 @@ export default function App() {
         </section>
       )}
 
-      <nav className="tab-bar" aria-label="FieldLedger sections">
-        <button
-          type="button"
-          className={activeTab === TABS.DASHBOARD ? "active" : ""}
-          onClick={() => setActiveTab(TABS.DASHBOARD)}
-        >
-          Dashboard
-        </button>
-        <button
-          type="button"
-          className={activeTab === TABS.JOBS ? "active" : ""}
-          onClick={() => setActiveTab(TABS.JOBS)}
-        >
-          Jobs
-        </button>
-        <button
-          type="button"
-          className={activeTab === TABS.EXPENSES ? "active" : ""}
-          onClick={() => setActiveTab(TABS.EXPENSES)}
-        >
-          Expenses
-        </button>
-        <button
-          type="button"
-          className={activeTab === TABS.MILEAGE ? "active" : ""}
-          onClick={() => setActiveTab(TABS.MILEAGE)}
-        >
-          Mileage
-        </button>
-        <button
-          type="button"
-          className={activeTab === TABS.SETTINGS ? "active" : ""}
-          onClick={() => setActiveTab(TABS.SETTINGS)}
-        >
-          Settings
-        </button>
-        <button
-          type="button"
-          className={activeTab === TABS.HELP ? "active" : ""}
-          onClick={() =>
-            setActiveTab((currentTab) =>
-              currentTab === TABS.HELP ? TABS.DASHBOARD : TABS.HELP
-            )
-          }
-        >
-          {activeTab === TABS.HELP ? "Help — click again to close" : "Help"}
-        </button>
+      <nav className="tab-bar" aria-label="CrewPay Field App sections">
+        <TabButton activeTab={activeTab} tab={TABS.HOME} onSelect={setActiveTab}>Today</TabButton>
+        <TabButton activeTab={activeTab} tab={TABS.WORK} onSelect={setActiveTab}>Work</TabButton>
+        <TabButton activeTab={activeTab} tab={TABS.REVIEW} onSelect={setActiveTab}>Review</TabButton>
+        <TabButton activeTab={activeTab} tab={TABS.TOOLS} onSelect={setActiveTab}>Tools</TabButton>
+        <TabButton activeTab={activeTab} tab={TABS.SETTINGS} onSelect={setActiveTab}>Settings</TabButton>
+        <TabButton activeTab={activeTab} tab={TABS.HELP} onSelect={setActiveTab}>Help</TabButton>
       </nav>
 
-      {activeTab === TABS.DASHBOARD && (
+      {activeTab === TABS.HOME && (
         <>
           <section className="data-ownership-notice">
-            <strong>Data ownership reminder</strong>
+            <strong>Workbook boundary</strong>
             <p>
-              FieldLedger stores records locally on this browser/device. Your phone and
-              computer do not automatically share data.
-            </p>
-
-            <p>
-              Use JSON Backup regularly to protect your records before clearing browser
-              data, switching devices, reinstalling the app, or importing a replacement
-              backup.
-            </p>
-
-            <p>
-              Deleting browser/site data without a backup can permanently erase your
-              saved records.
+              CrewPay Ledger workbook remains the source of truth. This app prepares local
+              worker records and reviewable exports; it does not approve or override payroll.
             </p>
           </section>
-          <PayPeriodInfoForm key={`pay-period-info-${refreshCount}`} />
-          <ExportActionsDropdown
-            onShowTimesheet={() => setShowTimesheetPrintView(true)}
-            onDataChanged={refreshAppData}
-          />
-          {showTimesheetPrintView && <TimesheetPrintView />}
           <PayPeriodSummaryPanel key={`summary-${refreshCount}`} />
+          <section className="panel action-panel">
+            <h2>Start Fast</h2>
+            <div className="quick-action-grid">
+              <button type="button" onClick={() => setActiveTab(TABS.WORK)}>Add Work Entry</button>
+              <button type="button" onClick={() => setActiveTab(TABS.REVIEW)}>Review Current Period</button>
+              <button type="button" className="secondary-button" onClick={() => setActiveTab(TABS.TOOLS)}>Expenses & Mileage</button>
+            </div>
+          </section>
         </>
       )}
 
-      {activeTab === TABS.JOBS && (
+      {activeTab === TABS.WORK && (
         <>
           <SavedJobsList key={`jobs-${refreshCount}`} onJobDeleted={refreshAppData} />
           <JobEntryForm onJobSaved={refreshAppData} />
         </>
       )}
 
-      {activeTab === TABS.EXPENSES && (
+      {activeTab === TABS.REVIEW && (
         <>
-          <SavedExpensesList key={`expenses-${refreshCount}`} onExpenseDeleted={refreshAppData} />
-          <ExpenseEntryForm onExpenseSaved={refreshAppData} />
+          <PayPeriodInfoForm key={`pay-period-info-${refreshCount}`} />
+          <ExportActionsDropdown
+            onShowTimesheet={() => setShowTimesheetPrintView(true)}
+            onDataChanged={refreshAppData}
+          />
+          {showTimesheetPrintView && <TimesheetPrintView />}
+          <PayPeriodSummaryPanel key={`review-summary-${refreshCount}`} />
         </>
       )}
 
-      {activeTab === TABS.MILEAGE && (
+      {activeTab === TABS.TOOLS && (
         <>
+          <section className="panel">
+            <h2>Secondary Field Tools</h2>
+            <p className="helper">
+              Expenses, mileage, reports, and backups stay available for worker records.
+              CrewPay time-entry export only includes the confirmed intake subset.
+            </p>
+          </section>
+          <SavedExpensesList key={`expenses-${refreshCount}`} onExpenseDeleted={refreshAppData} />
+          <ExpenseEntryForm onExpenseSaved={refreshAppData} />
           <SavedMileageList key={`mileage-${refreshCount}`} onMileageDeleted={refreshAppData} />
           <MileageEntryForm onMileageSaved={refreshAppData} />
         </>
@@ -169,5 +143,17 @@ export default function App() {
 
       {activeTab === TABS.HELP && <HelpPanel />}
     </main>
+  );
+}
+
+function TabButton({ activeTab, tab, onSelect, children }) {
+  return (
+    <button
+      type="button"
+      className={activeTab === tab ? "active" : ""}
+      onClick={() => onSelect(tab)}
+    >
+      {children}
+    </button>
   );
 }

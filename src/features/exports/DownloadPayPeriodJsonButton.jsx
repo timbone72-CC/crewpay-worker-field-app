@@ -30,5 +30,5 @@ function buildFileName(payPeriod) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "");
 
-  return `fieldledger-${safeLabel || "pay-period"}.json`;
+  return `crewpay-field-app-backup-${safeLabel || "pay-period"}.json`;
 }

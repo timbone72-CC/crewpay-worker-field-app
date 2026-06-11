@@ -1,6 +1,6 @@
 import DownloadPayPeriodCsvButton from "./DownloadPayPeriodCsvButton.jsx";
-import SendPayPeriodCsvToTrustedSheetButton from "./SendPayPeriodCsvToTrustedSheetButton.jsx";
 import DownloadPayPeriodJsonButton from "./DownloadPayPeriodJsonButton.jsx";
+import DownloadProofManifestButton from "./DownloadProofManifestButton.jsx";
 import ImportPayPeriodJsonButton from "./ImportPayPeriodJsonButton.jsx";
 import PrintPayPeriodReportButton from "./PrintPayPeriodReportButton.jsx";
 import ClearPayPeriodButton from "../pay-periods/ClearPayPeriodButton.jsx";
@@ -28,7 +28,7 @@ export default function ExportActionsDropdown({ onShowTimesheet, onDataChanged }
 
       <div className="export-actions-menu">
         <p className="helper">
-          FieldLedger data is saved in this browser. Use Download JSON Backup when you want a
+          CrewPay Field App data is saved in this browser. Use Download JSON Backup when you want a
           manual copy before switching devices, clearing browser data, or importing a replacement
           backup. Clear Pay Period downloads its own safety backup before clearing.
         </p>
@@ -40,10 +40,10 @@ export default function ExportActionsDropdown({ onShowTimesheet, onDataChanged }
         <ImportPayPeriodJsonButton onImportComplete={onDataChanged} />
 
         <p className="helper">
-          <strong>Timesheet / Reports</strong>
+          <strong>CrewPay Intake / Reports</strong>
         </p>
         <DownloadPayPeriodCsvButton />
-        <SendPayPeriodCsvToTrustedSheetButton />
+        <DownloadProofManifestButton />
         <PrintPayPeriodReportButton />
 
         <button type="button" onClick={handlePrintTimesheet}>

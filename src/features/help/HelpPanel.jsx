@@ -4,8 +4,8 @@ export default function HelpPanel() {
       <h2>Help & Workflow Guide</h2>
 
       <p>
-        FieldLedger is an offline-first 1099 field-work tracker for jobs,
-        expenses, mileage, receipts, and pay-period reporting.
+        CrewPay Field App is an offline-first worker companion for local work entries,
+        proof, expenses, mileage, review, backup, and CrewPay intake exports.
       </p>
 
       <nav className="help-contents" aria-label="Help guide contents">
@@ -13,10 +13,8 @@ export default function HelpPanel() {
         <ul>
           <li><a href="#help-getting-started">Getting Started</a></li>
           <li><a href="#help-data-reminder">Important Data Reminder</a></li>
-          <li><a href="#help-product-scope">Current Product Scope</a></li>
-          <li><a href="#help-update-app">Keeping FieldLedger Updated</a></li>
-          <li><a href="#help-future-ideas">Future Ideas</a></li>
-          <li><a href="#help-feedback">Feedback</a></li>
+          <li><a href="#help-workbook-boundary">Workbook Boundary</a></li>
+          <li><a href="#help-update-app">Keeping the App Fresh</a></li>
         </ul>
       </nav>
 
@@ -24,10 +22,11 @@ export default function HelpPanel() {
         <h3>Getting Started</h3>
 
         <ol>
-          <li>Create or review your pay period dates.</li>
-          <li>Add jobs, expenses, and mileage entries.</li>
-          <li>Use JSON Backup regularly to protect your records.</li>
-          <li>Export or print your pay-period report when ready.</li>
+          <li>Set worker defaults in Settings if useful.</li>
+          <li>Add work entries from the Work tab.</li>
+          <li>Attach proof photos as part of the work entry when needed.</li>
+          <li>Use Review to inspect records before exporting CrewPay intake CSV.</li>
+          <li>Use JSON Backup regularly to protect local records.</li>
         </ol>
       </section>
 
@@ -35,82 +34,32 @@ export default function HelpPanel() {
         <h3>Important Data Reminder</h3>
 
         <p>
-          FieldLedger stores records locally on this browser/device.
+          CrewPay Field App stores records locally on this browser/device.
         </p>
 
         <p>
-          Your phone and computer do not automatically share data.
+          Your phone and computer do not automatically share data. Use JSON Backup
+          before clearing browser data, switching devices, reinstalling the app, or
+          importing replacement backups.
         </p>
-
-        <p>
-          Use JSON Backup regularly before:
-        </p>
-
-        <ul>
-          <li>Clearing browser/site data</li>
-          <li>Switching devices</li>
-          <li>Reinstalling the app</li>
-          <li>Importing replacement backups</li>
-        </ul>
       </section>
 
-      <section id="help-product-scope">
-        <h3>Current Product Scope</h3>
+      <section id="help-workbook-boundary">
+        <h3>Workbook Boundary</h3>
 
-        <ul>
-          <li>Offline-first</li>
-          <li>No required login</li>
-          <li>No required cloud sync</li>
-          <li>No AI or OCR required</li>
-          <li>Manual-review-first workflow</li>
-        </ul>
+        <p>
+          CrewPay Ledger workbook remains the source of truth. This app prepares
+          reviewable intake exports and does not approve, calculate, or override payroll.
+        </p>
       </section>
 
       <section id="help-update-app">
-        <h3>Keeping FieldLedger Updated</h3>
+        <h3>Keeping the App Fresh</h3>
 
         <p>
-          Sometimes the installed app may keep older files cached after a deployment
-          or visible update.
+          If the installed app looks outdated after a deployment, open Settings and tap
+          <strong> Refresh Installed App</strong>. Local records stay on this device.
         </p>
-
-        <p>
-          If the app still looks outdated after an update, open Settings and tap
-          <strong> Update App</strong>.
-        </p>
-
-        <p>
-          Your saved records stay on this device during the update process.
-        </p>
-      </section>
-
-      <section id="help-future-ideas">
-        <h3>Future Ideas</h3>
-
-        <ul>
-          <li>Clickable contextual help tips</li>
-          <li>Expanded onboarding walkthroughs</li>
-          <li>Google Sheets setup guide</li>
-        </ul>
-      </section>
-
-      <section id="help-feedback">
-        <h3>Feedback</h3>
-
-        <p>
-          Found a bug, confusing workflow, or something that could be easier?
-        </p>
-
-        <p>
-          During the trusted-user phase, please text the app owner with:
-        </p>
-
-        <ul>
-          <li>bug reports</li>
-          <li>workflow confusion</li>
-          <li>feature ideas</li>
-          <li>export/report issues</li>
-        </ul>
       </section>
     </section>
   );

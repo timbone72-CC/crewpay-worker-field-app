@@ -5,20 +5,20 @@ import { loadSettings, saveSettings } from "./settingsStorage.js";
 export default function SettingsPanel() {
   const savedSettings = loadSettings();
 
-  const [hourlyRate, setHourlyRate] = useState(savedSettings.hourlyRate);
-  const [selfEmploymentTaxRate, setSelfEmploymentTaxRate] = useState(
-    (savedSettings.selfEmploymentTaxRate * 100).toFixed(2),
-  );
-  const [federalTaxRate, setFederalTaxRate] = useState((savedSettings.federalTaxRate * 100).toFixed(2));
-  const [stateTaxRate, setStateTaxRate] = useState((savedSettings.stateTaxRate * 100).toFixed(2));
+  const [workerId, setWorkerId] = useState(savedSettings.workerId || "");
+  const [workerName, setWorkerName] = useState(savedSettings.workerName || "");
+  const [defaultPayType, setDefaultPayType] = useState(savedSettings.defaultPayType || "hourly");
+  const [defaultRateRef, setDefaultRateRef] = useState(savedSettings.defaultRateRef || "");
+  const [hourlyRate, setHourlyRate] = useState(savedSettings.hourlyRate || 0);
   const [saveMessage, setSaveMessage] = useState("");
 
   function saveUserSettings() {
     const saved = saveSettings({
+      workerId,
+      workerName,
+      defaultPayType,
+      defaultRateRef,
       hourlyRate: Number(hourlyRate || 0),
-      selfEmploymentTaxRate: Number(selfEmploymentTaxRate || 0) / 100,
-      federalTaxRate: Number(federalTaxRate || 0) / 100,
-      stateTaxRate: Number(stateTaxRate || 0) / 100,
     });
 
     if (!saved) {
@@ -26,13 +26,13 @@ export default function SettingsPanel() {
       return;
     }
 
-    setSaveMessage("Settings saved.");
+    setSaveMessage("Worker settings saved locally.");
   }
 
   async function updateApp() {
     if (!navigator.onLine) {
       window.alert(
-        "You appear to be offline. Do not update FieldLedger while offline. Reconnect to the internet, open the app once, then use Update App."
+        "You appear to be offline. Reconnect before refreshing the installed app shell. Local records stay on this device."
       );
       return;
     }
@@ -40,18 +40,14 @@ export default function SettingsPanel() {
     try {
       if ("serviceWorker" in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
-
-        await Promise.all(
-          registrations.map((registration) => registration.unregister()),
-        );
+        await Promise.all(registrations.map((registration) => registration.unregister()));
       }
 
       if ("caches" in window) {
         const cacheNames = await window.caches.keys();
-
         await Promise.all(
           cacheNames
-            .filter((cacheName) => cacheName.startsWith("fieldledger-"))
+            .filter((cacheName) => cacheName.startsWith("crewpay-field-app-"))
             .map((cacheName) => window.caches.delete(cacheName)),
         );
       }
@@ -61,88 +57,58 @@ export default function SettingsPanel() {
   }
 
   return (
-    <section className="panel">
-      <h2>Settings</h2>
+    <section className="panel settings-panel">
+      <h2>Worker Settings</h2>
 
-      <label className="field">
-        Default Hourly Rate
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={hourlyRate}
-          onChange={(event) => setHourlyRate(event.target.value)}
-        />
-      </label>
+      <div className="form-grid">
+        <label className="field">
+          Worker ID
+          <input value={workerId} onChange={(event) => setWorkerId(event.target.value)} />
+        </label>
 
-      <label className="field">
-        Self-Employment Tax Rate %
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={selfEmploymentTaxRate}
-          onChange={(event) => setSelfEmploymentTaxRate(event.target.value)}
-        />
-      </label>
+        <label className="field">
+          Worker Name
+          <input value={workerName} onChange={(event) => setWorkerName(event.target.value)} />
+        </label>
 
-      <label className="field">
-        Federal Tax Rate %
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={federalTaxRate}
-          onChange={(event) => setFederalTaxRate(event.target.value)}
-        />
-      </label>
+        <label className="field">
+          Default Pay Type
+          <input value={defaultPayType} onChange={(event) => setDefaultPayType(event.target.value)} />
+        </label>
 
-      <label className="field">
-        State Tax Rate % (Oklahoma default)
-        <input
-          type="number"
-          min="0"
-          step="0.01"
-          value={stateTaxRate}
-          onChange={(event) => setStateTaxRate(event.target.value)}
-        />
-      </label>
+        <label className="field">
+          Rate Reference
+          <input value={defaultRateRef} onChange={(event) => setDefaultRateRef(event.target.value)} />
+        </label>
+
+        <label className="field">
+          Optional Local Rate
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            value={hourlyRate}
+            onChange={(event) => setHourlyRate(event.target.value)}
+          />
+        </label>
+      </div>
 
       <p className="helper">
-        Tax estimates are for planning only and are not tax advice. Changing the default
-        hourly rate will not change old saved jobs.
+        Rate references are for CrewPay workbook review. The workbook remains the source of truth for approved payroll values.
       </p>
 
-      <div className="helper">
-        <strong>FieldLedger Basics:</strong>
-        <br />
-        FieldLedger saves data in this browser on this device. Your phone and computer do not automatically
-        share data. Use JSON Backup before clearing browser data, switching devices, or importing a replacement
-        backup. Tax and mileage estimates are for planning only.
-      </div>
-
-      <div className="helper">
-        <strong>App Version:</strong> {APP_NAME} — {APP_VERSION_LABEL}
-        <br />
-        Current update: {APP_VERSION_DATE} — {APP_VERSION_NOTE}
-        <br />
-        If the live app looks outdated after an update, first try closing and reopening the browser tab.
-        If it still looks old, use JSON Backup, then refresh or clear browser site data only after confirming
-        the backup downloaded.
-      </div>
-
       <button type="button" onClick={saveUserSettings}>
-        Save Settings
+        Save Worker Settings
       </button>
 
       <div className="helper">
-        <strong>Update App:</strong>
+        <strong>App Version:</strong> {APP_NAME} - {APP_VERSION_LABEL}
         <br />
-        Reload FieldLedger and refresh the app cache. Use this only while online. Your saved records stay on this device.
+        Current update: {APP_VERSION_DATE} - {APP_VERSION_NOTE}
       </div>
 
       <button type="button" onClick={updateApp}>
-        Update App
+        Refresh Installed App
       </button>
 
       {saveMessage && <p className="helper">{saveMessage}</p>}

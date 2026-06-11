@@ -1,16 +1,36 @@
-# React + Vite
+# CrewPay Field App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+CrewPay Field App is a local-first worker field app for recording daily work entries, proof photos, expenses, mileage, pay-period review notes, backups, and CrewPay intake exports.
 
-Currently, two official plugins are available:
+This branch is adapted from a protected FieldLedger clone. The goal is a distinct CrewPay worker product, not a direct visual reskin.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Workbook Boundary
 
-## React Compiler
+CrewPay Ledger workbook remains the source of truth.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The app prepares reviewable local records and export files. It does not approve payroll, replace workbook formulas, mutate final payroll logic, or connect directly to live Google Sheets in this version.
 
-## Expanding the ESLint configuration
+## Local Workflow
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Add work entries with worker, job/site, date, time or hours, pay type, rate reference, notes, and proof.
+- Keep expenses and mileage as secondary local field tools.
+- Review the current pay period before export.
+- Export CrewPay Time Entries CSV for workbook intake review.
+- Download JSON backups for worker-owned recovery.
+- Download a proof manifest when work entries have proof/photo references.
+
+## Privacy Boundary
+
+Do not commit real worker data, customer data, Sheet IDs, Apps Script URLs, tokens, private URLs, emails, phone numbers, or addresses.
+
+Records are stored locally in the browser. Devices do not automatically share data.
+
+## Development
+
+```bash
+npm install
+npm run test:crewpay
+npm run build
+```
+
+`npm run lint` currently includes legacy lint coverage and may surface pre-existing issues outside the CrewPay v1 changes.
