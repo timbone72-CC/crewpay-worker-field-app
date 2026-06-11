@@ -211,3 +211,9 @@ The app builds, the CrewPay helper tests pass, core local storage/export paths a
 - Replaced visible FieldLedger wording in recovery, local storage, clear-pay-period, and backup-before-clear flows with CrewPay Field App wording.
 - Review tab completeness remains open for a later pass.
 - Proof-photo backup expectations remain open for a later pass.
+
+## Fix Pass 2
+
+- Added a read-only Review records panel that shows saved work entries, proof reference counts, expenses, mileage, notes, statuses, and empty states before export/backup.
+- Wired the Review records panel into the Review tab between the summary and export controls.
+- Review tab completeness is improved for worker testing, but proof-photo backup expectations, restore-schema modernization, print label alignment, and stronger tests remain open.
