@@ -9,6 +9,7 @@ import MileageEntryForm from "./features/mileage/MileageEntryForm.jsx";
 import SavedMileageList from "./features/mileage/SavedMileageList.jsx";
 import PayPeriodInfoForm from "./features/pay-periods/PayPeriodInfoForm.jsx";
 import PayPeriodSummaryPanel from "./features/pay-periods/PayPeriodSummaryPanel.jsx";
+import ReviewRecordsPanel from "./features/review/ReviewRecordsPanel.jsx";
 import SettingsPanel from "./features/settings/SettingsPanel.jsx";
 import HelpPanel from "./features/help/HelpPanel.jsx";
 import TimesheetPrintView from "./features/exports/TimesheetPrintView.jsx";
@@ -114,12 +115,13 @@ export default function App() {
       {activeTab === TABS.REVIEW && (
         <>
           <PayPeriodInfoForm key={`pay-period-info-${refreshCount}`} />
+          <PayPeriodSummaryPanel key={`review-summary-${refreshCount}`} />
+          <ReviewRecordsPanel key={`review-records-${refreshCount}`} />
           <ExportActionsDropdown
             onShowTimesheet={() => setShowTimesheetPrintView(true)}
             onDataChanged={refreshAppData}
           />
           {showTimesheetPrintView && <TimesheetPrintView />}
-          <PayPeriodSummaryPanel key={`review-summary-${refreshCount}`} />
         </>
       )}
 
