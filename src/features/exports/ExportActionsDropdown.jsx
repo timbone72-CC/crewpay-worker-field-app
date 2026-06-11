@@ -34,6 +34,13 @@ export default function ExportActionsDropdown({ onShowTimesheet, onDataChanged }
         </p>
 
         <p className="helper">
+          Proof photos and receipt photos are stored locally on this device. JSON backups, CSV files,
+          and proof manifests keep photo names and proof references, but they do not include the
+          actual image files. Save or share important photos separately if you need them outside this
+          device.
+        </p>
+
+        <p className="helper">
           <strong>Backup / Restore</strong>
         </p>
         <PersonalCloudBackupPanel />
