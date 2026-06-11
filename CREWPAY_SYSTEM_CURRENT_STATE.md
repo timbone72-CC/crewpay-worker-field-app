@@ -45,6 +45,9 @@ Local path:
 GitHub repo:
 https://github.com/timbone72-CC/crewpay-worker-field-app
 
+Live app:
+https://timbone72-cc.github.io/crewpay-worker-field-app/
+
 Branch:
 crewpay-worker-app
 
@@ -54,26 +57,31 @@ Worker-facing local-first field app.
 Current status:
 - Converted from protected FieldLedger clone into CrewPay Field App.
 - Worker app is pushed to its own repo.
-- Tests pass.
-- Build passes.
+- GitHub Pages workflow exists for static deployment.
+- Vite base path, manifest paths, service worker root, and service worker registration match `/crewpay-worker-field-app/`.
+- Tests pass in the prior confirmed local state.
+- Build passes in the prior confirmed local state.
+- Pages workflow runs `npm run test:crewpay` and `npm run build` before deployment.
 - Manual personal cloud backup/export exists.
 - Handoff file exists.
 
-Latest confirmed worker app commit:
-82f2ac3 Add CrewPay worker app handoff
-
 Key files:
+- .github/workflows/pages.yml
 - CREWPAY_WORKER_APP_HANDOFF.md
 - src/features/exports/PersonalCloudBackupPanel.jsx
 - src/features/crewpay/personalCloudBackup.js
 - src/features/crewpay/crewPayIntake.js
 - public/manifest.webmanifest
+- public/sw.js
+- src/main.jsx
+- vite.config.js
 - README.md
 
 Important boundary:
 The worker app is not the admin workbook app.
 The worker app should remain local-first and worker-facing.
 CrewPay Ledger workbook remains the source of truth.
+Manual personal cloud backup is manual export/share only, not automatic sync.
 
 ### 3. Protected FieldLedger Source
 
@@ -81,7 +89,7 @@ Local source remote:
 fieldledger-source
 
 Push status:
-DISABLED_DO_NOT_PUSH_TO_FIELDLEDGER_SOURCE
+Disabled for push.
 
 Important boundary:
 Do not push CrewPay worker app changes back to original FieldLedger source.
@@ -92,14 +100,15 @@ Admin workbook app:
 Working and bridged.
 
 Worker field app:
-Pushed, tested, built, and handed off.
+Pushed, tested, built, handed off, and configured for GitHub Pages deployment.
 
 FieldLedger source:
 Protected.
 
 ## Next likely steps
 
-- Final UI review of Worker Field App.
-- Decide whether to deploy Worker Field App.
+- In GitHub repo settings, confirm Pages source is set to GitHub Actions if it is not already enabled.
+- Let the Pages workflow complete.
+- Open the live app URL and verify install/offline behavior.
 - Handle Dependabot/security alert separately.
 - Add worker-to-workbook sync later only through the approved CrewPay pending intake/bridge design.
