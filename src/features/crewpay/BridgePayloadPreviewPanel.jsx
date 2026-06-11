@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { loadActivePayPeriod } from "../pay-periods/activePayPeriodStorage.js";
 import {
   buildBridgePayloadPreviewExport,
@@ -9,10 +10,25 @@ export default function BridgePayloadPreviewPanel() {
   const payPeriod = loadActivePayPeriod();
   const previewPayloads = buildBridgePayloadPreviews(payPeriod);
   const summary = buildBridgePreviewSummary(previewPayloads);
+  const [copyMessage, setCopyMessage] = useState("");
+
+  function buildPreviewJsonText() {
+    return JSON.stringify(buildBridgePayloadPreviewExport(payPeriod), null, 2);
+  }
+
+  async function copyPreviewJson() {
+    const previewText = buildPreviewJsonText();
+
+    try {
+      await navigator.clipboard.writeText(previewText);
+      setCopyMessage("Preview JSON copied.");
+    } catch {
+      setCopyMessage("Copy unavailable here. Use Download Preview JSON instead.");
+    }
+  }
 
   function downloadPreviewJson() {
-    const previewExport = buildBridgePayloadPreviewExport(payPeriod);
-    const blob = new Blob([JSON.stringify(previewExport, null, 2)], {
+    const blob = new Blob([buildPreviewJsonText()], {
       type: "application/json",
     });
     const url = URL.createObjectURL(blob);
@@ -48,10 +64,14 @@ export default function BridgePayloadPreviewPanel() {
             </div>
           </div>
           <div className="section-actions">
+            <button type="button" className="secondary-button" onClick={copyPreviewJson}>
+              Copy Preview JSON
+            </button>
             <button type="button" className="secondary-button" onClick={downloadPreviewJson}>
               Download Preview JSON
             </button>
           </div>
+          {copyMessage && <p className="helper">{copyMessage}</p>}
         </>
       )}
 
