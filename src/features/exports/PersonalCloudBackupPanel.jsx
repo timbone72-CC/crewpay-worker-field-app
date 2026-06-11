@@ -30,7 +30,7 @@ export default function PersonalCloudBackupPanel() {
     try {
       await navigator.share({
         title: "CrewPay Field App Backup",
-        text: "Manual CrewPay Field App backup files. Save them to your personal cloud folder if needed.",
+        text: "Manual CrewPay Field App backup files. Save them to your personal cloud folder if needed. Photo files are not included.",
         files,
       });
     } catch (error) {
@@ -56,6 +56,12 @@ export default function PersonalCloudBackupPanel() {
         Download these files, then manually save them to Google Drive, iCloud, Dropbox,
         OneDrive, or another personal cloud folder. CrewPay Ledger workbook remains the
         payroll source of truth.
+      </p>
+
+      <p className="helper">
+        Backup files include JSON data, the CrewPay CSV, and proof manifests when proof
+        references exist. They keep photo names and reference details, but they do not
+        include the actual photo or receipt image files from this device.
       </p>
 
       <div className="section-actions">
