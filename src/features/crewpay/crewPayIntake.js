@@ -161,6 +161,27 @@ export function buildProofManifest(jobs = []) {
   };
 }
 
+export function buildCrewPayBridgeTimeEntryPayload(entryInput = {}, options = {}) {
+  const entry = createCrewPayWorkEntry(entryInput);
+  const rate = safeMoney(options.rate ?? entryInput.rate ?? entryInput.hourlyRate ?? entryInput.hourlyRateSnapshot);
+  const payPeriodId = stringOr(options.payPeriodId ?? entryInput.payPeriodId, "");
+  const jobWorkType = firstNonEmpty([entry.jobName, entry.siteName, entry.companyName, entry.jobId]);
+
+  return {
+    action: "submitTimeEntry",
+    clientId: stringOr(options.clientId ?? entryInput.clientId, "crewpay-worker-field-app"),
+    entryId: entry.id,
+    workerId: entry.workerId,
+    workerName: entry.workerName,
+    payPeriodId,
+    workDate: entry.entryDate,
+    jobWorkType,
+    hoursWorked: entry.hoursWorked,
+    rate,
+    notes: entry.notes,
+  };
+}
+
 export function formatCsvCell(value) {
   const text = String(value ?? "");
 
@@ -187,6 +208,15 @@ function normalizeProofRef(proofRef) {
 function safeHours(value) {
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? number : 0;
+}
+
+function safeMoney(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : 0;
+}
+
+function firstNonEmpty(values) {
+  return values.map((value) => stringOr(value, "").trim()).find(Boolean) ?? "";
 }
 
 function stringOr(value, fallback) {

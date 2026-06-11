@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import {
   buildCrewPayTimeEntriesCsv,
+  buildCrewPayBridgeTimeEntryPayload,
   buildProofManifest,
   createCrewPayWorkEntry,
   formatCsvCell,
@@ -82,3 +83,33 @@ const proofManifest = buildProofManifest([mappedEntry]);
 assert.equal(proofManifest.appName, "CrewPay Field App");
 assert.equal(proofManifest.proofEntries.length, 1);
 assert.equal(proofManifest.proofEntries[0].entryId, "local-1");
+
+const bridgePayload = buildCrewPayBridgeTimeEntryPayload(mappedEntry, {
+  payPeriodId: "PP-1",
+  rate: 25,
+});
+assert.deepEqual(bridgePayload, {
+  action: "submitTimeEntry",
+  clientId: "crewpay-worker-field-app",
+  entryId: "local-1",
+  workerId: "W-1",
+  workerName: "Sample Worker",
+  payPeriodId: "PP-1",
+  workDate: "2026-06-11",
+  jobWorkType: "Install",
+  hoursWorked: 8,
+  rate: 25,
+  notes: "Needs review",
+});
+
+const fallbackBridgePayload = buildCrewPayBridgeTimeEntryPayload({
+  id: "local-3",
+  workerId: "W-2",
+  entryDate: "2026-06-12",
+  siteName: "South Site",
+  hoursWorked: 6,
+  payPeriodId: "PP-2",
+  hourlyRate: "18.50",
+});
+assert.equal(fallbackBridgePayload.jobWorkType, "South Site");
+assert.equal(fallbackBridgePayload.rate, 18.5);
