@@ -6,11 +6,19 @@ import {
   buildBridgePreviewSummary,
 } from "./bridgePayloadPreview.js";
 
+const PREVIEW_FILTERS = {
+  ALL: "all",
+  READY: "ready",
+  MISSING: "missing",
+};
+
 export default function BridgePayloadPreviewPanel() {
   const payPeriod = loadActivePayPeriod();
   const previewPayloads = buildBridgePayloadPreviews(payPeriod);
   const summary = buildBridgePreviewSummary(previewPayloads);
   const [copyMessage, setCopyMessage] = useState("");
+  const [activeFilter, setActiveFilter] = useState(PREVIEW_FILTERS.ALL);
+  const visiblePayloads = filterPreviewPayloads(previewPayloads, activeFilter);
 
   function buildPreviewJsonText() {
     return JSON.stringify(buildBridgePayloadPreviewExport(payPeriod), null, 2);
@@ -64,6 +72,17 @@ export default function BridgePayloadPreviewPanel() {
             </div>
           </div>
           <div className="section-actions">
+            <button type="button" className="secondary-button" onClick={() => setActiveFilter(PREVIEW_FILTERS.ALL)}>
+              All
+            </button>
+            <button type="button" className="secondary-button" onClick={() => setActiveFilter(PREVIEW_FILTERS.READY)}>
+              Ready
+            </button>
+            <button type="button" className="secondary-button" onClick={() => setActiveFilter(PREVIEW_FILTERS.MISSING)}>
+              Missing Fields
+            </button>
+          </div>
+          <div className="section-actions">
             <button type="button" className="secondary-button" onClick={copyPreviewJson}>
               Copy Preview JSON
             </button>
@@ -71,15 +90,18 @@ export default function BridgePayloadPreviewPanel() {
               Download Preview JSON
             </button>
           </div>
+          <p className="helper">Showing {visiblePayloads.length} preview record(s).</p>
           {copyMessage && <p className="helper">{copyMessage}</p>}
         </>
       )}
 
       {previewPayloads.length === 0 ? (
         <p className="helper">No saved work entries are available to preview.</p>
+      ) : visiblePayloads.length === 0 ? (
+        <p className="helper">No preview records match this filter.</p>
       ) : (
         <div className="list">
-          {previewPayloads.slice(0, 5).map(({ localId, payload, missingFields }) => (
+          {visiblePayloads.slice(0, 5).map(({ localId, payload, missingFields }) => (
             <div className="result-card" key={localId || `${payload.workerId}-${payload.workDate}`}>
               <strong>{payload.workDate || "No work date"}</strong>
               <span>{payload.jobWorkType || "No job/work type"}</span>
@@ -96,9 +118,21 @@ export default function BridgePayloadPreviewPanel() {
         </div>
       )}
 
-      {previewPayloads.length > 5 && (
-        <p className="helper">Showing first 5 of {previewPayloads.length} saved work entries.</p>
+      {visiblePayloads.length > 5 && (
+        <p className="helper">Showing first 5 of {visiblePayloads.length} matching work entries.</p>
       )}
     </section>
   );
+}
+
+function filterPreviewPayloads(previewPayloads, activeFilter) {
+  if (activeFilter === PREVIEW_FILTERS.READY) {
+    return previewPayloads.filter((preview) => preview.missingFields.length === 0);
+  }
+
+  if (activeFilter === PREVIEW_FILTERS.MISSING) {
+    return previewPayloads.filter((preview) => preview.missingFields.length > 0);
+  }
+
+  return previewPayloads;
 }
