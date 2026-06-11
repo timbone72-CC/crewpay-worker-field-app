@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import {
+  buildBridgePayloadPreviewExport,
   buildBridgePayloadPreviews,
   findMissingBridgeTimeEntryFields,
 } from "./bridgePayloadPreview.js";
 
-const previews = buildBridgePayloadPreviews({
+const payPeriod = {
   id: "PP-1",
+  label: "Current Pay Period",
   jobs: [
     {
       id: "job-1",
@@ -26,7 +28,9 @@ const previews = buildBridgePayloadPreviews({
       hourlyRate: 0,
     },
   ],
-});
+};
+
+const previews = buildBridgePayloadPreviews(payPeriod);
 
 assert.equal(previews.length, 2);
 assert.deepEqual(previews[0].missingFields, []);
@@ -51,6 +55,18 @@ assert.deepEqual(previews[1].missingFields, [
   "hoursWorked",
   "rate",
 ]);
+
+const previewExport = buildBridgePayloadPreviewExport(payPeriod, {
+  exportedAt: "2026-06-11T18:00:00.000Z",
+});
+assert.equal(previewExport.exportType, "bridge-payload-preview");
+assert.equal(previewExport.exportedAt, "2026-06-11T18:00:00.000Z");
+assert.equal(previewExport.payPeriodId, "PP-1");
+assert.equal(previewExport.payPeriodLabel, "Current Pay Period");
+assert.equal(previewExport.totalPreviewCount, 2);
+assert.equal(previewExport.bridgeReadyCount, 1);
+assert.equal(previewExport.previewOnly, true);
+assert.equal(previewExport.previews.length, 2);
 
 assert.deepEqual(findMissingBridgeTimeEntryFields({
   workerId: "W-2",
