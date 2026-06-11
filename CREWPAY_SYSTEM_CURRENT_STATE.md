@@ -112,3 +112,26 @@ Protected.
 - Open the live app URL and verify install/offline behavior.
 - Handle Dependabot/security alert separately.
 - Add worker-to-workbook sync later only through the approved CrewPay pending intake/bridge design.
+
+## Worker App Final Publish Status
+
+Status date:
+2026-06-11
+
+Current safe head:
+999158c Fix export copy test whitespace match
+
+Live URL:
+https://timbone72-cc.github.io/crewpay-worker-field-app/
+
+Final verified state:
+- GitHub Pages deploy succeeded.
+- Live bundle includes worker timesheet wording, proof/photo backup warnings, total hours, and proof refs.
+- Full worker app tests pass with npm run test:worker-app.
+- Production build passes with npm run build.
+- Branch is clean/aligned with origin/crewpay-worker-app.
+
+Worker app boundary:
+- Worker-facing local-first field app.
+- CrewPay Ledger workbook remains source of truth.
+- No backend, admin dashboard, tax system, banking system, cloud sync, OAuth, or live Google Sheets submission added.
