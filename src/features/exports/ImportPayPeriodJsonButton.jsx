@@ -14,7 +14,7 @@ export default function ImportPayPeriodJsonButton({ onImportComplete }) {
       const payPeriod = JSON.parse(fileText);
 
       if (!isValidPayPeriodBackup(payPeriod)) {
-        window.alert("This does not look like a valid FieldLedger pay period backup.");
+        window.alert("This does not look like a valid CrewPay Field App pay period backup.");
         event.target.value = "";
         return;
       }
@@ -34,7 +34,7 @@ export default function ImportPayPeriodJsonButton({ onImportComplete }) {
       });
 
       if (!saved) {
-        window.alert("FieldLedger could not save this imported backup. Your current pay period was not replaced.");
+        window.alert("CrewPay Field App could not save this imported backup. Your current pay period was not replaced.");
         event.target.value = "";
         return;
       }

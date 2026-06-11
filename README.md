@@ -18,12 +18,15 @@ The app prepares reviewable local records and export files. It does not approve 
 - Export CrewPay Time Entries CSV for workbook intake review.
 - Download JSON backups for worker-owned recovery.
 - Download a proof manifest when work entries have proof/photo references.
+- Use Personal Cloud Backup to download or share the backup package, then manually save it to a personal cloud folder.
 
 ## Privacy Boundary
 
 Do not commit real worker data, customer data, Sheet IDs, Apps Script URLs, tokens, private URLs, emails, phone numbers, or addresses.
 
 Records are stored locally in the browser. Devices do not automatically share data.
+
+Personal Cloud Backup does not connect a cloud account or sync in the background. It only creates files the worker can download or manually save to Google Drive, iCloud, Dropbox, OneDrive, or another personal storage location.
 
 ## Development
 

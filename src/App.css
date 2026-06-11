@@ -52,6 +52,20 @@
   margin-top: 16px;
 }
 
+.personal-cloud-panel {
+  display: grid;
+  flex-basis: 100%;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid rgba(13, 81, 67, 0.2);
+  border-radius: 8px;
+  background: #f0faf5;
+}
+
+.personal-cloud-panel .section-heading {
+  margin-bottom: 0;
+}
+
 button,
 .import-json-button {
   min-height: 46px;
