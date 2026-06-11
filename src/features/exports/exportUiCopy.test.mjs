@@ -6,8 +6,8 @@ const personalBackupSource = readFileSync("src/features/exports/PersonalCloudBac
 
 assert.match(exportMenuSource, /Proof photos and receipt photos are stored locally on this device/);
 assert.match(exportMenuSource, /photo names and proof references/);
-assert.match(exportMenuSource, /do not include the actual image files/);
-assert.match(personalBackupSource, /do not include the actual photo or receipt image files/);
+assert.match(exportMenuSource, /do not include the\s+actual image files/);
+assert.match(personalBackupSource, /do not\s+include the actual photo or receipt image files/);
 assert.match(personalBackupSource, /Photo files are not included/);
 
 assert.doesNotMatch(exportMenuSource, /Print Full Report/);
