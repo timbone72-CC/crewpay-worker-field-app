@@ -3,7 +3,6 @@ import DownloadPayPeriodJsonButton from "./DownloadPayPeriodJsonButton.jsx";
 import DownloadProofManifestButton from "./DownloadProofManifestButton.jsx";
 import ImportPayPeriodJsonButton from "./ImportPayPeriodJsonButton.jsx";
 import PersonalCloudBackupPanel from "./PersonalCloudBackupPanel.jsx";
-import PrintPayPeriodReportButton from "./PrintPayPeriodReportButton.jsx";
 import ClearPayPeriodButton from "../pay-periods/ClearPayPeriodButton.jsx";
 
 export default function ExportActionsDropdown({ onShowTimesheet, onDataChanged }) {
@@ -46,7 +45,6 @@ export default function ExportActionsDropdown({ onShowTimesheet, onDataChanged }
         </p>
         <DownloadPayPeriodCsvButton />
         <DownloadProofManifestButton />
-        <PrintPayPeriodReportButton />
 
         <button type="button" onClick={handlePrintTimesheet}>
           Print Timesheet

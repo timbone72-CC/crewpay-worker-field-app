@@ -1,5 +1,5 @@
 /**
- * 1. FieldLedger Active Pay Period Validation
+ * 1. CrewPay Field App Active Pay Period Validation
  *
  * Central shape validation for saved pay period data.
  * This checks structure only. It does not repair data.

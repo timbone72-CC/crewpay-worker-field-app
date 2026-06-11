@@ -69,7 +69,7 @@ export default function CameraCapture({ label = "Take Photo", onPhotoCaptured })
         return;
       }
 
-      const photoFile = new File([blob], `fieldledger-photo-${Date.now()}.jpg`, {
+      const photoFile = new File([blob], `crewpay-proof-photo-${Date.now()}.jpg`, {
         type: "image/jpeg",
       });
 

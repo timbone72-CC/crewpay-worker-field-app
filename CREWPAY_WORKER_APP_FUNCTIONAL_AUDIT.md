@@ -204,3 +204,10 @@ The app builds, the CrewPay helper tests pass, core local storage/export paths a
 6. Loosen restore validation toward the CrewPay schema while preserving legacy backup compatibility.
 7. Add browser-level or component-level tests for save-to-review-to-export and print/report wiring.
 8. Improve service worker precaching if stronger offline guarantees are required.
+
+## Fix Pass 1
+
+- Removed the visible `Print Full Report` control until a real full-report view is implemented.
+- Replaced visible FieldLedger wording in recovery, local storage, clear-pay-period, and backup-before-clear flows with CrewPay Field App wording.
+- Review tab completeness remains open for a later pass.
+- Proof-photo backup expectations remain open for a later pass.
