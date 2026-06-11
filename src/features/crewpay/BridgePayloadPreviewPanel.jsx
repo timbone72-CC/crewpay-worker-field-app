@@ -1,9 +1,25 @@
 import { loadActivePayPeriod } from "../pay-periods/activePayPeriodStorage.js";
-import { buildBridgePayloadPreviews } from "./bridgePayloadPreview.js";
+import {
+  buildBridgePayloadPreviewExport,
+  buildBridgePayloadPreviews,
+} from "./bridgePayloadPreview.js";
 
 export default function BridgePayloadPreviewPanel() {
   const payPeriod = loadActivePayPeriod();
   const previewPayloads = buildBridgePayloadPreviews(payPeriod);
+
+  function downloadPreviewJson() {
+    const previewExport = buildBridgePayloadPreviewExport(payPeriod);
+    const blob = new Blob([JSON.stringify(previewExport, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "crewpay-bridge-payload-preview.json";
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <section className="panel">
@@ -12,6 +28,14 @@ export default function BridgePayloadPreviewPanel() {
         Preview only. This shows the pending time-entry payload shape the app can prepare for the
         CrewPay workbook bridge. Nothing is submitted from this panel.
       </p>
+
+      {previewPayloads.length > 0 && (
+        <div className="section-actions">
+          <button type="button" className="secondary-button" onClick={downloadPreviewJson}>
+            Download Preview JSON
+          </button>
+        </div>
+      )}
 
       {previewPayloads.length === 0 ? (
         <p className="helper">No saved work entries are available to preview.</p>
