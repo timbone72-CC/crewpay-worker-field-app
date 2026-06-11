@@ -2,11 +2,13 @@ import { loadActivePayPeriod } from "../pay-periods/activePayPeriodStorage.js";
 import {
   buildBridgePayloadPreviewExport,
   buildBridgePayloadPreviews,
+  buildBridgePreviewSummary,
 } from "./bridgePayloadPreview.js";
 
 export default function BridgePayloadPreviewPanel() {
   const payPeriod = loadActivePayPeriod();
   const previewPayloads = buildBridgePayloadPreviews(payPeriod);
+  const summary = buildBridgePreviewSummary(previewPayloads);
 
   function downloadPreviewJson() {
     const previewExport = buildBridgePayloadPreviewExport(payPeriod);
@@ -30,11 +32,27 @@ export default function BridgePayloadPreviewPanel() {
       </p>
 
       {previewPayloads.length > 0 && (
-        <div className="section-actions">
-          <button type="button" className="secondary-button" onClick={downloadPreviewJson}>
-            Download Preview JSON
-          </button>
-        </div>
+        <>
+          <div className="review-total-grid">
+            <div className="review-total-card">
+              <span>Total</span>
+              <strong>{summary.totalPreviewCount}</strong>
+            </div>
+            <div className="review-total-card">
+              <span>Ready</span>
+              <strong>{summary.bridgeReadyCount}</strong>
+            </div>
+            <div className="review-total-card">
+              <span>Missing Fields</span>
+              <strong>{summary.missingFieldCount}</strong>
+            </div>
+          </div>
+          <div className="section-actions">
+            <button type="button" className="secondary-button" onClick={downloadPreviewJson}>
+              Download Preview JSON
+            </button>
+          </div>
+        </>
       )}
 
       {previewPayloads.length === 0 ? (
