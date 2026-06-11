@@ -1,5 +1,5 @@
-const CACHE_NAME = "crewpay-field-app-v1-offline-shell";
-const APP_ROOT = "/crewpay-field-app/";
+const CACHE_NAME = "crewpay-worker-field-app-v1-offline-shell";
+const APP_ROOT = "/crewpay-worker-field-app/";
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -22,7 +22,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) =>
       Promise.all(
         keys
-          .filter((key) => key.startsWith("crewpay-field-app-") && key !== CACHE_NAME)
+          .filter((key) => key.startsWith("crewpay-worker-field-app-") && key !== CACHE_NAME)
           .map((key) => caches.delete(key))
       )
     )
