@@ -217,3 +217,25 @@ The app builds, the CrewPay helper tests pass, core local storage/export paths a
 - Added a read-only Review records panel that shows saved work entries, proof reference counts, expenses, mileage, notes, statuses, and empty states before export/backup.
 - Wired the Review records panel into the Review tab between the summary and export controls.
 - Review tab completeness is improved for worker testing, but proof-photo backup expectations, restore-schema modernization, print label alignment, and stronger tests remain open.
+
+## Fix Pass 2b
+
+- Added Review totals inside the saved-record review panel.
+- Totals now show work-entry count, total hours, proof references, local expenses, receipt references, local mileage, and mileage estimate before export/backup.
+
+## Fix Pass 3
+
+- Clarified backup/photo wording in the Export / Backup section and Personal Cloud Backup panel.
+- UI now explains that JSON backups, CSV files, and proof manifests preserve photo names and references, but do not include actual photo or receipt image files.
+
+## Fix Pass 4
+
+- Polished the Work entry form for worker usability.
+- Added guidance for local review status, calculated hours, overnight shifts, pay method, and rate/reference fields.
+- Kept internal field names and CrewPay CSV/workbook schema unchanged.
+
+## Fix Pass 5
+
+- Aligned the print button and printed heading around Worker Timesheet wording.
+- Added printed summary totals for entries, total hours, proof references, and mileage.
+- Removed the previous Timesheet vs Worker Review Report wording mismatch.
