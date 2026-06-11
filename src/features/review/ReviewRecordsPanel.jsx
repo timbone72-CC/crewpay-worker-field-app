@@ -9,6 +9,14 @@ export default function ReviewRecordsPanel() {
   const mileageEntries = Array.isArray(payPeriod.mileageEntries) ? payPeriod.mileageEntries : [];
   const mileageSummary = calculateMileageSummary(mileageEntries);
   const hasRecords = workEntries.length > 0 || expenses.length > 0 || mileageEntries.length > 0;
+  const totalWorkHours = workEntries.reduce((total, entry) => total + Number(entry.hoursWorked || 0), 0);
+  const totalExpenses = expenses.reduce((total, expense) => total + Number(expense.amount || 0), 0);
+  const totalMileageEstimate = mileageEntries.reduce(
+    (total, entry) => total + Number(entry.miles || 0) * Number(entry.mileageRateSnapshot || 0),
+    0,
+  );
+  const totalProofRefs = workEntries.reduce((total, entry) => total + entry.proofRefs.length, 0);
+  const totalReceiptRefs = expenses.reduce((total, expense) => total + countReceiptPhotos(expense), 0);
 
   return (
     <section className="panel review-records-panel">
@@ -19,6 +27,16 @@ export default function ReviewRecordsPanel() {
           These are the local records currently saved in this browser. Review them before
           downloading backups, printing a timesheet, or exporting the CrewPay intake CSV.
         </p>
+      </div>
+
+      <div className="review-total-grid" aria-label="Saved records totals">
+        <TotalCard label="Work Entries" value={workEntries.length} />
+        <TotalCard label="Total Hours" value={totalWorkHours.toFixed(2)} />
+        <TotalCard label="Proof Refs" value={totalProofRefs} />
+        <TotalCard label="Local Expenses" value={`$${totalExpenses.toFixed(2)}`} />
+        <TotalCard label="Receipt Refs" value={totalReceiptRefs} />
+        <TotalCard label="Local Mileage" value={`${mileageSummary.totalBusinessMiles.toFixed(1)} mi`} />
+        <TotalCard label="Mileage Estimate" value={`$${totalMileageEstimate.toFixed(2)}`} />
       </div>
 
       {!hasRecords && (
@@ -125,6 +143,15 @@ function ReviewSection({ title, count, emptyMessage, children }) {
       </h3>
       {count === 0 ? <p className="helper">{emptyMessage}</p> : <div className="list">{children}</div>}
     </section>
+  );
+}
+
+function TotalCard({ label, value }) {
+  return (
+    <div className="review-total-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 
