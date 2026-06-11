@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   buildBridgePayloadPreviewExport,
   buildBridgePayloadPreviews,
+  buildBridgePreviewSummary,
   findMissingBridgeTimeEntryFields,
 } from "./bridgePayloadPreview.js";
 
@@ -56,6 +57,18 @@ assert.deepEqual(previews[1].missingFields, [
   "rate",
 ]);
 
+assert.deepEqual(buildBridgePreviewSummary(previews), {
+  totalPreviewCount: 2,
+  bridgeReadyCount: 1,
+  missingFieldCount: 1,
+});
+
+assert.deepEqual(buildBridgePreviewSummary("not-array"), {
+  totalPreviewCount: 0,
+  bridgeReadyCount: 0,
+  missingFieldCount: 0,
+});
+
 const previewExport = buildBridgePayloadPreviewExport(payPeriod, {
   exportedAt: "2026-06-11T18:00:00.000Z",
 });
@@ -65,6 +78,7 @@ assert.equal(previewExport.payPeriodId, "PP-1");
 assert.equal(previewExport.payPeriodLabel, "Current Pay Period");
 assert.equal(previewExport.totalPreviewCount, 2);
 assert.equal(previewExport.bridgeReadyCount, 1);
+assert.equal(previewExport.missingFieldCount, 1);
 assert.equal(previewExport.previewOnly, true);
 assert.equal(previewExport.previews.length, 2);
 
