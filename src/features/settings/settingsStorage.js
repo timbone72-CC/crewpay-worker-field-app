@@ -9,8 +9,11 @@ export function loadSettings() {
 }
 
 export function saveSettings(settings) {
+  const existingSettings = loadSettings();
+
   return saveJson(STORAGE_KEYS.SETTINGS, {
     ...createDefaultSettings(),
+    ...existingSettings,
     ...settings,
     updatedAt: new Date().toISOString(),
   });
@@ -23,5 +26,6 @@ export function createDefaultSettings() {
     workerName: "",
     defaultPayType: "hourly",
     defaultRateRef: "",
+    bridgeEndpoint: "",
   };
 }

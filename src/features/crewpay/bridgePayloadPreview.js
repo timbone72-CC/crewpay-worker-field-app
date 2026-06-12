@@ -9,12 +9,14 @@ export const REQUIRED_BRIDGE_TIME_ENTRY_FIELDS = [
   "rate",
 ];
 
-export function buildBridgePayloadPreviews(payPeriod = {}) {
+export function buildBridgePayloadPreviews(payPeriod = {}, options = {}) {
   const jobs = Array.isArray(payPeriod.jobs) ? payPeriod.jobs : [];
+  const defaultRate = safeMoney(options.defaultRate ?? payPeriod?.hourlyRate ?? 0);
 
   return jobs.map((job) => {
     const payload = buildCrewPayBridgeTimeEntryPayload(job, {
       payPeriodId: job.payPeriodId || payPeriod.id,
+      rate: defaultRate,
     });
 
     return {
@@ -37,7 +39,7 @@ export function buildBridgePreviewSummary(previews = []) {
 }
 
 export function buildBridgePayloadPreviewExport(payPeriod = {}, options = {}) {
-  const previews = buildBridgePayloadPreviews(payPeriod);
+  const previews = buildBridgePayloadPreviews(payPeriod, options);
   const summary = buildBridgePreviewSummary(previews);
 
   return {
@@ -73,4 +75,9 @@ function stringOr(value, fallback) {
   }
 
   return String(value);
+}
+
+function safeMoney(value) {
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : 0;
 }

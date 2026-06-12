@@ -32,6 +32,12 @@ const payPeriod = {
 };
 
 const previews = buildBridgePayloadPreviews(payPeriod);
+const ratedPreviews = buildBridgePayloadPreviews(
+  {
+    ...payPeriod,
+    hourlyRate: 25,
+  },
+);
 
 assert.equal(previews.length, 2);
 assert.deepEqual(previews[0].missingFields, []);
@@ -63,6 +69,9 @@ assert.deepEqual(buildBridgePreviewSummary(previews), {
   missingFieldCount: 1,
 });
 
+assert.deepEqual(ratedPreviews[0].missingFields, []);
+assert.equal(ratedPreviews[0].payload.rate, 25);
+
 assert.deepEqual(buildBridgePreviewSummary("not-array"), {
   totalPreviewCount: 0,
   bridgeReadyCount: 0,
@@ -72,6 +81,15 @@ assert.deepEqual(buildBridgePreviewSummary("not-array"), {
 const previewExport = buildBridgePayloadPreviewExport(payPeriod, {
   exportedAt: "2026-06-11T18:00:00.000Z",
 });
+const ratedPreviewExport = buildBridgePayloadPreviewExport(
+  {
+    ...payPeriod,
+    hourlyRate: 25,
+  },
+  {
+    exportedAt: "2026-06-11T18:00:00.000Z",
+  },
+);
 assert.equal(previewExport.exportType, "bridge-payload-preview");
 assert.equal(previewExport.exportedAt, "2026-06-11T18:00:00.000Z");
 assert.equal(previewExport.payPeriodId, "PP-1");
@@ -81,6 +99,8 @@ assert.equal(previewExport.bridgeReadyCount, 1);
 assert.equal(previewExport.missingFieldCount, 1);
 assert.equal(previewExport.previewOnly, true);
 assert.equal(previewExport.previews.length, 2);
+assert.equal(ratedPreviewExport.bridgeReadyCount, 1);
+assert.equal(ratedPreviewExport.previews[0].payload.rate, 25);
 
 assert.deepEqual(findMissingBridgeTimeEntryFields({
   workerId: "W-2",

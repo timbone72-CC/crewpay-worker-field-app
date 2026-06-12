@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { loadCrewPayBridgeEndpoint } from "../bridge/bridgeSettingsStorage.js";
+import { submitCrewPayBridgeTimeEntries } from "../bridge/crewPayBridge.js";
 import { loadActivePayPeriod } from "../pay-periods/activePayPeriodStorage.js";
+import { loadSettings } from "../settings/settingsStorage.js";
 import {
   buildBridgePayloadPreviewExport,
   buildBridgePayloadPreviews,
@@ -14,14 +17,27 @@ const PREVIEW_FILTERS = {
 
 export default function BridgePayloadPreviewPanel() {
   const payPeriod = loadActivePayPeriod();
-  const previewPayloads = buildBridgePayloadPreviews(payPeriod);
+  const savedSettings = loadSettings();
+  const previewPayloads = buildBridgePayloadPreviews(payPeriod, {
+    defaultRate: Number(savedSettings.hourlyRate || 0),
+  });
   const summary = buildBridgePreviewSummary(previewPayloads);
+  const bridgeEndpoint = loadCrewPayBridgeEndpoint();
   const [copyMessage, setCopyMessage] = useState("");
   const [activeFilter, setActiveFilter] = useState(PREVIEW_FILTERS.ALL);
+  const [submitMessage, setSubmitMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const visiblePayloads = filterPreviewPayloads(previewPayloads, activeFilter);
+  const readyPayloads = previewPayloads.filter((preview) => preview.missingFields.length === 0);
 
   function buildPreviewJsonText() {
-    return JSON.stringify(buildBridgePayloadPreviewExport(payPeriod), null, 2);
+    return JSON.stringify(
+      buildBridgePayloadPreviewExport(payPeriod, {
+        defaultRate: Number(savedSettings.hourlyRate || 0),
+      }),
+      null,
+      2,
+    );
   }
 
   async function copyPreviewJson() {
@@ -47,12 +63,38 @@ export default function BridgePayloadPreviewPanel() {
     URL.revokeObjectURL(url);
   }
 
+  async function submitReadyPayloads() {
+    if (!bridgeEndpoint) {
+      setSubmitMessage("Preview only - no workbook bridge endpoint is configured.");
+      return;
+    }
+
+    if (readyPayloads.length === 0) {
+      setSubmitMessage("No bridge-ready payloads are available to submit.");
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const result = await submitCrewPayBridgeTimeEntries({
+        endpoint: bridgeEndpoint,
+        payloads: readyPayloads.map((preview) => preview.payload),
+      });
+
+      setSubmitMessage(result.message);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
   return (
     <section className="panel">
       <h2>Workbook Bridge Preview</h2>
       <p className="helper">
-        Preview only. This shows the pending time-entry payload shape the app can prepare for the
-        CrewPay workbook bridge. Nothing is submitted from this panel.
+        {bridgeEndpoint
+          ? "This shows the pending time-entry payload shape the app can prepare for the CrewPay workbook bridge."
+          : "Preview only - no workbook bridge endpoint is configured. Save an endpoint in Settings to enable manual submit."}
       </p>
 
       {previewPayloads.length > 0 && (
@@ -89,9 +131,17 @@ export default function BridgePayloadPreviewPanel() {
             <button type="button" className="secondary-button" onClick={downloadPreviewJson}>
               Download Preview JSON
             </button>
+            <button
+              type="button"
+              onClick={submitReadyPayloads}
+              disabled={!bridgeEndpoint || readyPayloads.length === 0 || isSubmitting}
+            >
+              {isSubmitting ? "Submitting..." : "Submit Ready Payloads"}
+            </button>
           </div>
           <p className="helper">Showing {visiblePayloads.length} preview record(s).</p>
           {copyMessage && <p className="helper">{copyMessage}</p>}
+          {submitMessage && <p className="helper">{submitMessage}</p>}
         </>
       )}
 

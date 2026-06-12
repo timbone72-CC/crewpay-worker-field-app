@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test:crewpay": "node --test src/features/crewpay/*.test.mjs",
+    "test:crewpay": "node --test src/features/crewpay/*.test.mjs src/features/bridge/*.test.mjs",
     "preview": "vite preview",
     "test:worker-app": "find src -name '*.test.mjs' -print0 | xargs -0 node --test"
   },

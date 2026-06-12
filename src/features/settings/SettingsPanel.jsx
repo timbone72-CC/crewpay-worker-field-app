@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { APP_NAME, APP_VERSION_DATE, APP_VERSION_LABEL, APP_VERSION_NOTE } from "../../shared/constants/appInfo.js";
 import { loadSettings, saveSettings } from "./settingsStorage.js";
+import CrewPayBridgeEndpointSettings from "../bridge/CrewPayBridgeEndpointSettings.jsx";
 
 export default function SettingsPanel() {
   const savedSettings = loadSettings();
@@ -100,6 +101,8 @@ export default function SettingsPanel() {
       <button type="button" onClick={saveUserSettings}>
         Save Worker Settings
       </button>
+
+      <CrewPayBridgeEndpointSettings />
 
       <div className="helper">
         <strong>App Version:</strong> {APP_NAME} - {APP_VERSION_LABEL}

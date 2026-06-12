@@ -300,6 +300,33 @@ button:disabled {
   margin: 0 0 12px;
 }
 
+.bridge-settings-panel,
+.bridge-preview-panel {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bridge-preview-details {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.bridge-preview-json {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #11211b;
+  color: #f1fff6;
+  overflow: auto;
+  max-height: 360px;
+  font-size: 0.84rem;
+}
+
+.bridge-preview-validation {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
 .attached-photo-preview img {
   display: block;
   max-width: 240px;
