@@ -35,7 +35,13 @@ const previews = buildBridgePayloadPreviews(payPeriod);
 const ratedPreviews = buildBridgePayloadPreviews(
   {
     ...payPeriod,
-    hourlyRate: 25,
+    jobs: payPeriod.jobs.map((job) => ({
+      ...job,
+      hourlyRate: 0,
+    })),
+  },
+  {
+    defaultRate: 25,
   },
 );
 
@@ -84,10 +90,14 @@ const previewExport = buildBridgePayloadPreviewExport(payPeriod, {
 const ratedPreviewExport = buildBridgePayloadPreviewExport(
   {
     ...payPeriod,
-    hourlyRate: 25,
+    jobs: payPeriod.jobs.map((job) => ({
+      ...job,
+      hourlyRate: 0,
+    })),
   },
   {
     exportedAt: "2026-06-11T18:00:00.000Z",
+    defaultRate: 25,
   },
 );
 assert.equal(previewExport.exportType, "bridge-payload-preview");

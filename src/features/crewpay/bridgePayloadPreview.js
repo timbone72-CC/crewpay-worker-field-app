@@ -11,12 +11,15 @@ export const REQUIRED_BRIDGE_TIME_ENTRY_FIELDS = [
 
 export function buildBridgePayloadPreviews(payPeriod = {}, options = {}) {
   const jobs = Array.isArray(payPeriod.jobs) ? payPeriod.jobs : [];
-  const defaultRate = safeMoney(options.defaultRate ?? payPeriod?.hourlyRate ?? 0);
 
   return jobs.map((job) => {
+    const rate = safeMoney(
+      options.defaultRate ?? job.hourlyRate ?? job.hourlyRateSnapshot ?? payPeriod?.hourlyRate ?? 0,
+    );
+
     const payload = buildCrewPayBridgeTimeEntryPayload(job, {
       payPeriodId: job.payPeriodId || payPeriod.id,
-      rate: defaultRate,
+      rate,
     });
 
     return {
