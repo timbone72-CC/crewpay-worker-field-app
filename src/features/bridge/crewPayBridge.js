@@ -46,10 +46,12 @@ export function validateCrewPayBridgeTimeEntryPayload(payload) {
 
 export async function submitCrewPayBridgeTimeEntries({
   endpoint,
+  token,
   payloads,
   fetchImpl = globalThis.fetch,
 } = {}) {
   const safeEndpoint = normalizeEndpoint(endpoint);
+  const safeToken = normalizeToken(token);
   const safePayloads = Array.isArray(payloads) ? payloads : [];
 
   if (!safeEndpoint) {
@@ -58,6 +60,16 @@ export async function submitCrewPayBridgeTimeEntries({
       submittedCount: 0,
       failedCount: safePayloads.length,
       message: "Preview only - no workbook bridge endpoint is configured.",
+      details: [],
+    };
+  }
+
+  if (!safeToken) {
+    return {
+      ok: false,
+      submittedCount: 0,
+      failedCount: safePayloads.length,
+      message: "Submit failed - workbook bridge token is missing.",
       details: [],
     };
   }
@@ -101,13 +113,21 @@ export async function submitCrewPayBridgeTimeEntries({
     }
 
     try {
+      const requestBody = {
+        token: safeToken,
+        action: BRIDGE_ACTION,
+        clientId: "crewpay-worker-field-app",
+        payload,
+      };
       const response = await fetchImpl(safeEndpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(requestBody),
       });
+
+      const responseBody = await readBridgeResponseBody(response);
 
       if (!response?.ok) {
         failedCount += 1;
@@ -115,9 +135,22 @@ export async function submitCrewPayBridgeTimeEntries({
           entryId: payload.entryId || "",
           ok: false,
           status: response?.status || 0,
-          error: `Bridge returned ${response?.status || "an error"}.`,
+          error: bridgeResponseErrorMessage(response, responseBody),
         });
         continue;
+      }
+
+      if (responseBody && typeof responseBody === "object") {
+        if (responseBody.ok === false || responseBody.success === false) {
+          failedCount += 1;
+          details.push({
+            entryId: payload.entryId || "",
+            ok: false,
+            status: response.status,
+            error: bridgeResponseErrorMessage(response, responseBody),
+          });
+          continue;
+        }
       }
 
       submittedCount += 1;
@@ -125,6 +158,7 @@ export async function submitCrewPayBridgeTimeEntries({
         entryId: payload.entryId || "",
         ok: true,
         status: response.status,
+        response: responseBody,
       });
     } catch (error) {
       failedCount += 1;
@@ -156,6 +190,10 @@ function normalizeEndpoint(endpoint) {
   return String(endpoint ?? "").trim();
 }
 
+function normalizeToken(token) {
+  return String(token ?? "").trim();
+}
+
 function safeMoney(value) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : 0;
@@ -177,4 +215,48 @@ function validatePositiveNumber(errors, value, fieldName) {
 
 function formatTimeEntryWord(count) {
   return count === 1 ? "time entry" : "time entries";
+}
+
+async function readBridgeResponseBody(response) {
+  if (!response || typeof response !== "object") {
+    return null;
+  }
+
+  const contentType = String(response.headers?.get?.("content-type") || "").toLowerCase();
+
+  try {
+    if (contentType.includes("application/json") && typeof response.json === "function") {
+      return await response.json();
+    }
+
+    if (typeof response.text === "function") {
+      const text = await response.text();
+      return text ? tryParseJson(text) : text;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function tryParseJson(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+}
+
+function bridgeResponseErrorMessage(response, responseBody) {
+  const bodyMessage =
+    responseBody && typeof responseBody === "object"
+      ? responseBody.message || responseBody.error || responseBody.details
+      : "";
+
+  if (bodyMessage) {
+    return String(bodyMessage);
+  }
+
+  return `Bridge returned ${response?.status || "an error"}.`;
 }

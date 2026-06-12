@@ -27,5 +27,6 @@ export function createDefaultSettings() {
     defaultPayType: "hourly",
     defaultRateRef: "",
     bridgeEndpoint: "",
+    bridgeToken: "",
   };
 }

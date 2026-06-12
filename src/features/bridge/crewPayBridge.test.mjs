@@ -78,15 +78,37 @@ const missingEndpointResult = await submitCrewPayBridgeTimeEntries({
 assert.equal(missingEndpointResult.ok, false);
 assert.match(missingEndpointResult.message, /Preview only/);
 
+const missingTokenResult = await submitCrewPayBridgeTimeEntries({
+  endpoint: "https://example.com/bridge",
+  payloads,
+  fetchImpl: async () => {
+    throw new Error("fetch should not be called");
+  },
+});
+assert.equal(missingTokenResult.ok, false);
+assert.match(missingTokenResult.message, /workbook bridge token is missing/i);
+
 const calledRequests = [];
 const successResult = await submitCrewPayBridgeTimeEntries({
   endpoint: "https://example.com/bridge",
+  token: "CP_BRIDGE_TOKEN_VALUE",
   payloads: ratedPayloads,
   fetchImpl: async (url, options) => {
     calledRequests.push({ url, options });
     return {
       ok: true,
       status: 200,
+      headers: {
+        get(name) {
+          return name === "content-type" ? "application/json" : "";
+        },
+      },
+      async json() {
+        return {
+          ok: true,
+          message: "queued",
+        };
+      },
     };
   },
 });
@@ -97,18 +119,48 @@ assert.equal(calledRequests.length, 2);
 assert.equal(calledRequests[0].url, "https://example.com/bridge");
 assert.equal(calledRequests[0].options.method, "POST");
 assert.equal(calledRequests[0].options.headers["Content-Type"], "application/json");
+assert.deepEqual(JSON.parse(calledRequests[0].options.body), {
+  token: "CP_BRIDGE_TOKEN_VALUE",
+  action: "submitTimeEntry",
+  clientId: "crewpay-worker-field-app",
+  payload: ratedPayloads[0],
+});
 
 const failureResult = await submitCrewPayBridgeTimeEntries({
   endpoint: "https://example.com/bridge",
+  token: "CP_BRIDGE_TOKEN_VALUE",
   payloads: [{ ...payloads[0], workerId: "", rate: 25 }],
-  fetchImpl: async () => ({
-    ok: true,
-    status: 200,
-  }),
+  fetchImpl: async () => {
+    throw new Error("fetch should not be called for invalid payloads");
+  },
 });
 
 assert.equal(failureResult.ok, false);
 assert.equal(failureResult.failedCount, 1);
 assert.match(failureResult.message, /failed/);
+
+const responseFailureResult = await submitCrewPayBridgeTimeEntries({
+  endpoint: "https://example.com/bridge",
+  token: "CP_BRIDGE_TOKEN_VALUE",
+  payloads: ratedPayloads.slice(0, 1),
+  fetchImpl: async () => ({
+    ok: false,
+    status: 400,
+    headers: {
+      get() {
+        return "application/json";
+      },
+    },
+    async json() {
+      return {
+        error: "bad request",
+      };
+    },
+  }),
+});
+
+assert.equal(responseFailureResult.ok, false);
+assert.equal(responseFailureResult.failedCount, 1);
+assert.match(responseFailureResult.details[0].error, /bad request/i);
 
 console.log("crewPayBridge tests passed");

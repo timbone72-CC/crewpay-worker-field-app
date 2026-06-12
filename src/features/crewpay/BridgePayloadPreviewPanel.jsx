@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { loadCrewPayBridgeEndpoint } from "../bridge/bridgeSettingsStorage.js";
+import { loadCrewPayBridgeEndpoint, loadCrewPayBridgeToken } from "../bridge/bridgeSettingsStorage.js";
 import { submitCrewPayBridgeTimeEntries } from "../bridge/crewPayBridge.js";
 import { loadActivePayPeriod } from "../pay-periods/activePayPeriodStorage.js";
 import { loadSettings } from "../settings/settingsStorage.js";
@@ -23,6 +23,7 @@ export default function BridgePayloadPreviewPanel() {
   });
   const summary = buildBridgePreviewSummary(previewPayloads);
   const bridgeEndpoint = loadCrewPayBridgeEndpoint();
+  const bridgeToken = loadCrewPayBridgeToken();
   const [copyMessage, setCopyMessage] = useState("");
   const [activeFilter, setActiveFilter] = useState(PREVIEW_FILTERS.ALL);
   const [submitMessage, setSubmitMessage] = useState("");
@@ -69,6 +70,11 @@ export default function BridgePayloadPreviewPanel() {
       return;
     }
 
+    if (!bridgeToken) {
+      setSubmitMessage("Submit failed - workbook bridge token is missing.");
+      return;
+    }
+
     if (readyPayloads.length === 0) {
       setSubmitMessage("No bridge-ready payloads are available to submit.");
       return;
@@ -79,6 +85,7 @@ export default function BridgePayloadPreviewPanel() {
     try {
       const result = await submitCrewPayBridgeTimeEntries({
         endpoint: bridgeEndpoint,
+        token: bridgeToken,
         payloads: readyPayloads.map((preview) => preview.payload),
       });
 
@@ -93,7 +100,9 @@ export default function BridgePayloadPreviewPanel() {
       <h2>Workbook Bridge Preview</h2>
       <p className="helper">
         {bridgeEndpoint
-          ? "This shows the pending time-entry payload shape the app can prepare for the CrewPay workbook bridge."
+          ? bridgeToken
+            ? "This shows the pending time-entry payload shape the app can prepare for the CrewPay workbook bridge."
+            : "Preview only - the workbook bridge token is missing. Save the token in Settings to enable manual submit."
           : "Preview only - no workbook bridge endpoint is configured. Save an endpoint in Settings to enable manual submit."}
       </p>
 
@@ -134,7 +143,7 @@ export default function BridgePayloadPreviewPanel() {
             <button
               type="button"
               onClick={submitReadyPayloads}
-              disabled={!bridgeEndpoint || readyPayloads.length === 0 || isSubmitting}
+              disabled={!bridgeEndpoint || !bridgeToken || readyPayloads.length === 0 || isSubmitting}
             >
               {isSubmitting ? "Submitting..." : "Submit Ready Payloads"}
             </button>
