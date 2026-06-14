@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { loadCrewPayBridgeEndpoint, loadCrewPayBridgeToken } from "../bridge/bridgeSettingsStorage.js";
-import { submitCrewPayBridgeTimeEntries } from "../bridge/crewPayBridge.js";
+import { submitCrewPayBridgeTimeEntriesWithPendingQueue } from "../bridge/crewPayBridge.js";
 import { loadActivePayPeriod } from "../pay-periods/activePayPeriodStorage.js";
 import { loadSettings } from "../settings/settingsStorage.js";
 import {
@@ -65,16 +65,6 @@ export default function BridgePayloadPreviewPanel() {
   }
 
   async function submitReadyPayloads() {
-    if (!bridgeEndpoint) {
-      setSubmitMessage("Preview only - no workbook bridge endpoint is configured.");
-      return;
-    }
-
-    if (!bridgeToken) {
-      setSubmitMessage("Submit failed - workbook bridge token is missing.");
-      return;
-    }
-
     if (readyPayloads.length === 0) {
       setSubmitMessage("No bridge-ready payloads are available to submit.");
       return;
@@ -83,7 +73,7 @@ export default function BridgePayloadPreviewPanel() {
     setIsSubmitting(true);
 
     try {
-      const result = await submitCrewPayBridgeTimeEntries({
+      const result = await submitCrewPayBridgeTimeEntriesWithPendingQueue({
         endpoint: bridgeEndpoint,
         token: bridgeToken,
         payloads: readyPayloads.map((preview) => preview.payload),
@@ -102,8 +92,8 @@ export default function BridgePayloadPreviewPanel() {
         {bridgeEndpoint
           ? bridgeToken
             ? "This shows the pending time-entry payload shape the app can prepare for the CrewPay workbook bridge."
-            : "Preview only - the workbook bridge token is missing. Save the token in Settings to enable manual submit."
-          : "Preview only - no workbook bridge endpoint is configured. Save an endpoint in Settings to enable manual submit."}
+            : "Preview/queue mode - the workbook bridge token is missing. Save the token in Settings to retry pending sync."
+          : "Preview/queue mode - no workbook bridge endpoint is configured. Save an endpoint in Settings to retry pending sync."}
       </p>
 
       {previewPayloads.length > 0 && (
@@ -143,9 +133,9 @@ export default function BridgePayloadPreviewPanel() {
             <button
               type="button"
               onClick={submitReadyPayloads}
-              disabled={!bridgeEndpoint || !bridgeToken || readyPayloads.length === 0 || isSubmitting}
+              disabled={readyPayloads.length === 0 || isSubmitting}
             >
-              {isSubmitting ? "Submitting..." : "Submit Ready Payloads"}
+              {isSubmitting ? "Submitting..." : "Submit / Queue Ready Payloads"}
             </button>
           </div>
           <p className="helper">Showing {visiblePayloads.length} preview record(s).</p>
