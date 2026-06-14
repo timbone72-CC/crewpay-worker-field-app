@@ -1,3 +1,8 @@
+import {
+  enqueueCrewPayBridgePendingTimeEntries,
+  loadCrewPayBridgePendingQueue,
+  saveCrewPayBridgePendingQueue,
+} from "./bridgePendingQueueStorage.js";
 import { buildCrewPayBridgeTimeEntryPayload, mapJobToCrewPayWorkEntry } from "../crewpay/crewPayIntake.js";
 
 const BRIDGE_ACTION = "submitTimeEntry";
@@ -186,6 +191,138 @@ export async function submitCrewPayBridgeTimeEntries({
   };
 }
 
+export async function submitCrewPayBridgeTimeEntriesWithPendingQueue({
+  endpoint,
+  token,
+  payloads,
+  fetchImpl = globalThis.fetch,
+} = {}) {
+  const safePayloads = Array.isArray(payloads) ? payloads : [];
+  const { validPayloads, invalidDetails } = splitValidBridgePayloads(safePayloads);
+
+  if (safePayloads.length === 0) {
+    const result = await submitCrewPayBridgeTimeEntries({
+      endpoint,
+      token,
+      payloads: safePayloads,
+      fetchImpl,
+    });
+
+    return {
+      ...result,
+      queuedCount: 0,
+      pendingCount: loadCrewPayBridgePendingQueue().length,
+    };
+  }
+
+  const queueReason = bridgeQueueReason({ endpoint, token, fetchImpl });
+
+  if (queueReason) {
+    const queuedItems = enqueueCrewPayBridgePendingTimeEntries(validPayloads, {
+      reason: queueReason,
+    });
+
+    return {
+      ok: false,
+      submittedCount: 0,
+      failedCount: invalidDetails.length,
+      queuedCount: queuedItems.length,
+      pendingCount: loadCrewPayBridgePendingQueue().length,
+      message:
+        queuedItems.length > 0
+          ? `Queued ${queuedItems.length} ${formatTimeEntryWord(queuedItems.length)} for pending sync.`
+          : "No valid time entries are available to queue.",
+      details: [
+        ...invalidDetails,
+        ...queuedItems.map((item) => ({
+          entryId: item.payload.entryId || "",
+          ok: false,
+          queued: true,
+          status: "queued",
+          error: queueReason,
+        })),
+      ],
+    };
+  }
+
+  const submitResult = await submitCrewPayBridgeTimeEntries({
+    endpoint,
+    token,
+    payloads: validPayloads,
+    fetchImpl,
+  });
+  const networkFailedPayloads = findFailedNetworkPayloads(validPayloads, submitResult.details);
+  const queuedItems = enqueueCrewPayBridgePendingTimeEntries(networkFailedPayloads, {
+    reason: "Submit failed while offline or unreachable.",
+  });
+  const queuedEntryIds = new Set(queuedItems.map((item) => item.payload.entryId || ""));
+  const details = [
+    ...invalidDetails,
+    ...submitResult.details.map((detail) =>
+      queuedEntryIds.has(detail.entryId || "")
+        ? {
+            ...detail,
+            queued: true,
+            status: "queued",
+          }
+        : detail,
+    ),
+  ];
+  const failedCount = invalidDetails.length + submitResult.failedCount;
+
+  return {
+    ok: failedCount === 0,
+    submittedCount: submitResult.submittedCount,
+    failedCount,
+    queuedCount: queuedItems.length,
+    pendingCount: loadCrewPayBridgePendingQueue().length,
+    message:
+      queuedItems.length > 0
+        ? `${submitResult.message} Queued ${queuedItems.length} ${formatTimeEntryWord(queuedItems.length)} for pending sync.`
+        : invalidDetails.length > 0
+          ? `Submit blocked for ${invalidDetails.length} invalid ${formatTimeEntryWord(invalidDetails.length)}. ${submitResult.message}`
+          : submitResult.message,
+    details,
+  };
+}
+
+export async function retryCrewPayBridgePendingTimeEntries({
+  endpoint,
+  token,
+  fetchImpl = globalThis.fetch,
+} = {}) {
+  const queuedItems = loadCrewPayBridgePendingQueue();
+
+  if (queuedItems.length === 0) {
+    return {
+      ok: false,
+      submittedCount: 0,
+      failedCount: 0,
+      pendingCount: 0,
+      message: "No pending bridge time entries are queued.",
+      details: [],
+    };
+  }
+
+  const submitResult = await submitCrewPayBridgeTimeEntries({
+    endpoint,
+    token,
+    payloads: queuedItems.map((item) => item.payload),
+    fetchImpl,
+  });
+  const nextQueue = updateQueueAfterRetry(queuedItems, submitResult.details, submitResult.message);
+  saveCrewPayBridgePendingQueue(nextQueue);
+
+  return {
+    ...submitResult,
+    pendingCount: nextQueue.length,
+    message:
+      nextQueue.length === 0 && submitResult.submittedCount > 0
+        ? `Synced ${submitResult.submittedCount} pending ${formatTimeEntryWord(submitResult.submittedCount)}.`
+        : `${submitResult.message} ${nextQueue.length} pending ${formatTimeEntryWord(nextQueue.length)} remain queued.`,
+  };
+}
+
 function normalizeEndpoint(endpoint) {
   return String(endpoint ?? "").trim();
 }
@@ -197,6 +334,84 @@ function normalizeToken(token) {
 function safeMoney(value) {
   const number = Number(value);
   return Number.isFinite(number) && number >= 0 ? number : 0;
+}
+
+function splitValidBridgePayloads(payloads) {
+  const validPayloads = [];
+  const invalidDetails = [];
+
+  for (const payload of payloads) {
+    const validation = validateCrewPayBridgeTimeEntryPayload(payload);
+
+    if (validation.isValid) {
+      validPayloads.push(payload);
+      continue;
+    }
+
+    invalidDetails.push({
+      entryId: payload?.entryId || "",
+      ok: false,
+      status: "invalid",
+      error: validation.errors.join(" "),
+    });
+  }
+
+  return { validPayloads, invalidDetails };
+}
+
+function bridgeQueueReason({ endpoint, token, fetchImpl }) {
+  if (!normalizeEndpoint(endpoint)) {
+    return "No workbook bridge endpoint is configured.";
+  }
+
+  if (!normalizeToken(token)) {
+    return "Workbook bridge token is missing.";
+  }
+
+  if (typeof fetchImpl !== "function") {
+    return "Fetch is not available in this browser.";
+  }
+
+  return "";
+}
+
+function findFailedNetworkPayloads(payloads, details) {
+  const networkFailedEntryIds = new Set(
+    details
+      .filter((detail) => detail.status === "network_error")
+      .map((detail) => detail.entryId || ""),
+  );
+
+  return payloads.filter((payload) => networkFailedEntryIds.has(payload.entryId || ""));
+}
+
+function updateQueueAfterRetry(queuedItems, details, fallbackError) {
+  const detailByEntryId = new Map(
+    details.map((detail) => [detail.entryId || "", detail]),
+  );
+  const updatedAt = new Date().toISOString();
+
+  return queuedItems.flatMap((item) => {
+    const detail = detailByEntryId.get(item.payload?.entryId || "");
+
+    if (detail?.ok) {
+      return [];
+    }
+
+    return [
+      {
+        ...item,
+        attempts: safeAttemptCount(item.attempts) + 1,
+        lastError: detail?.error || fallbackError || "Submit failed.",
+        status: "pending",
+        updatedAt,
+      },
+    ];
+  });
+}
+
+function safeAttemptCount(value) {
+  return Number.isInteger(value) && value >= 0 ? value : 0;
 }
 
 function validateString(errors, value, fieldName) {
